@@ -1,57 +1,71 @@
-.DEFAULT_GOAL  = all
+.DEFAULT_GOAL = all
 
-build_id      := 0x$(shell dd if=/dev/urandom bs=40 count=1 2> /dev/null | sha1sum | awk '{print $$1}')
+numcpus  := $(shell cat /proc/cpuinfo | grep '^processor\s*:' | wc -l)
+version  := $(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)
 
-NAME           = market-fetcher-http
-PACKAGE        = github.com/cryptounicorns/$(NAME)
-NUMCPUS        = $(shell cat /proc/cpuinfo | grep '^processor\s*:' | wc -l)
-VERSION        = $(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)
-LDFLAGS        = -X $(PACKAGE)/cli.version=$(VERSION) \
-                 -B $(build_id)
+name     := market-fetcher-http
+package  := github.com/cryptounicorns/$(name)
 
+build    := ./build
+build_id := 0x$(shell echo $(version) | sha1sum | awk '{print $$1}')
+ldflags  := -X $(package)/cli.version=$(version) \
+            -B $(build_id)
 
 .PHONY: all
-all: tools
-
-.PHONY: $(NAME)
-$(NAME):
-	govendor remove +u
-	govendor add +e
-	govendor sync
-	mkdir -p build
-	@echo "Build id: $(build_id)"
-	go build -a -ldflags "$(LDFLAGS)" -v \
-		-o build/$(NAME)             \
-		$(PACKAGE)/$(NAME)
-
-.PHONY: build
-build: $(NAME)
-
-
-.PHONY: test
-test: tools
-	go test -v ./...
-
-.PHONY: bench
-bench: tools
-	go test -bench=. -v ./...
-
-.PHONY: lint
-lint: tools
-	go vet ./...
-	gometalinter                     \
-		--deadline=5m            \
-		--concurrency=$(NUMCPUS) \
-		--exclude="(^|/)vendor/" \
-		./...
-
-.PHONY: check
-check: lint test
+all:: dependencies
 
 .PHONY: tools
-tools:
-	if [ ! -e "$(GOPATH)"/bin/"govendor" ]; then go get github.com/kardianos/govendor; fi
-	if [ ! -e "$(GOPATH)"/bin/"godef" ]; then go get github.com/rogpeppe/godef; fi
-	if [ ! -e "$(GOPATH)"/bin/"gocode" ]; then go get github.com/nsf/gocode; fi
-	if [ ! -e "$(GOPATH)"/bin/"gometalinter" ]; then go get github.com/alecthomas/gometalinter && gometalinter --install; fi
-	if [ ! -e "$(GOPATH)"/src/"github.com/stretchr/testify/assert" ]; then go get github.com/stretchr/testify/assert; fi
+tools::
+	@if [ ! -e "$(GOPATH)"/bin/glide ]; then go get github.com/Masterminds/glide; fi
+	@if [ ! -e "$(GOPATH)"/bin/godef ]; then go get github.com/rogpeppe/godef; fi
+	@if [ ! -e "$(GOPATH)"/bin/gocode ]; then go get github.com/nsf/gocode; fi
+	@if [ ! -e "$(GOPATH)"/bin/gometalinter ]; then go get github.com/alecthomas/gometalinter && gometalinter --install; fi
+	@if [ ! -e "$(GOPATH)"/src/github.com/stretchr/testify/assert ]; then go get github.com/stretchr/testify/assert; fi
+
+.PHONY: dependencies
+dependencies:: tools
+	glide install
+
+.PHONY: clean
+clean:: tools
+	glide cache-clear
+
+.PHONY: test
+test:: dependencies
+	go test -v \
+           $(shell glide novendor)
+
+.PHONY: bench
+bench:: dependencies
+	go test        \
+           -bench=. -v \
+           $(shell glide novendor)
+
+.PHONY: lint
+lint:: dependencies
+	go vet $(shell glide novendor)
+	gometalinter                     \
+		--deadline=5m            \
+		--concurrency=$(numcpus) \
+		$(shell glide novendor)
+
+.PHONY: check
+check:: lint test
+
+.PHONY: all
+all:: $(name)
+
+.PHONY: $(name)
+$(name):: dependencies
+	mkdir -p $(build)
+	@echo "Build id: $(build_id)"
+	go build -a -ldflags "$(ldflags)" -v \
+                 -o build/$(name)            \
+                 $(package)/$(name)
+
+.PHONY: build
+build:: $(name)
+
+.PHONY: clean
+clean::
+	rm -rf $(build)
