@@ -25,9 +25,5 @@ var (
 
 // RootAction is executing when program called without any subcommand.
 func RootAction(c *cli.Context) error {
-	var (
-		err error
-	)
-
 	select {}
 }

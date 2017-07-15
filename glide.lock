@@ -1,0 +1,58 @@
+hash: b73e5fe59aef61fd10b68fc7689966f620811b5b4e07e0f9b3bc5e823b150a62
+updated: 2017-07-15T04:19:23.607494194Z
+imports:
+- name: github.com/bitly/go-nsq
+  version: 973bf9a2952ff7e38071ae8392b73e4418503059
+- name: github.com/corpix/formats
+  version: b3eae9c16eb4fb111bd1b85c0a2a141987c7c001
+- name: github.com/corpix/logger
+  version: 82e27f85c8a48ce6edadfeb7848ba7ecb01756d3
+  subpackages:
+  - logrus
+  - target/logrus
+- name: github.com/corpix/queues
+  version: d510b6db83fa464480340c1c3b73de8af9747068
+  subpackages:
+  - handler
+  - message
+  - queue/kafka
+  - queue/nsq
+- name: github.com/davecgh/go-spew
+  version: 346938d642f2ec3594ed81d874461961cd0faa76
+  subpackages:
+  - spew
+- name: github.com/eapache/go-resiliency
+  version: b1fe83b5b03f624450823b751b662259ffc6af70
+  subpackages:
+  - breaker
+- name: github.com/eapache/go-xerial-snappy
+  version: bb955e01b9346ac19dc29eb16586c90ded99a98c
+- name: github.com/eapache/queue
+  version: 44cc805cf13205b55f69e14bcb69867d1ae92f98
+- name: github.com/fatih/structs
+  version: 7e5a8eef611ee84dd359503f3969f80df4c50723
+- name: github.com/golang/snappy
+  version: 553a641470496b2327abcac10b36396bd98e45c9
+- name: github.com/jinzhu/copier
+  version: 8bfca8a02a0ce12119cdc4974143c834ca589257
+- name: github.com/pierrec/lz4
+  version: 5a3d2245f97fc249850e7802e3c01fad02a1c316
+- name: github.com/pierrec/xxHash
+  version: a0006b13c722f7f12368c00a3d3c2ae8a999a0c6
+  subpackages:
+  - xxHash32
+- name: github.com/rcrowley/go-metrics
+  version: 1f30fe9094a513ce4c700b9a54458bbb0c96996c
+- name: github.com/Shopify/sarama
+  version: 2fd980e23bdcbb8edeb78fc704de0c39a6567ffc
+- name: github.com/sirupsen/logrus
+  version: 7f976d3a76720c4c27af2ba716b85d2e0a7e38b1
+- name: github.com/urfave/cli
+  version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
+- name: golang.org/x/sys
+  version: 4cd6d1a821c7175768725b55ca82f14683a29ea4
+  subpackages:
+  - unix
+- name: gopkg.in/yaml.v2
+  version: 3b4ad1db5b2a649883ff3782f5f9f6fb52be71af
+testImports: []

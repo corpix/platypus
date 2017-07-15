@@ -8,31 +8,43 @@ import (
 	"github.com/corpix/formats"
 	"github.com/jinzhu/copier"
 
-	"github.com/cryptounicorns/market-fetcher-http/feed"
-	"github.com/cryptounicorns/market-fetcher-http/feed/nsq"
+	"github.com/cryptounicorns/market-fetcher-http/feeds"
+	"github.com/cryptounicorns/market-fetcher-http/feeds/feed/nsq"
 	"github.com/cryptounicorns/market-fetcher-http/logger"
 )
 
 var (
+	// NsqConfig represents default nsq config.
+	NsqConfig = nsq.WrapConfig(
+		nsq.Config{
+			Addr:    "127.0.0.1:4150",
+			Topic:   "ticker",
+			Channel: "market-fetcher-http",
+		},
+	)
+
+	// NsqFeed represents default nsq feed config.
+	NsqFeed = feeds.Config{
+		Type: feeds.NsqFeedType,
+		Nsq:  NsqConfig,
+	}
+
+	// LoggerConfig represents default configuration for a logger.
+	LoggerConfig = logger.Config{
+		Level: "info",
+	}
+
 	// Default represents default application configuration.
 	Default = Config{
-		Logger: logger.Config{
-			Level: "info",
-		},
-		Feed: feed.Config{
-			Type: feed.NsqFeedType,
-			Nsq: nsq.Config{
-				Addr:  "127.0.0.1:4150",
-				Topic: "ticker",
-			},
-		},
+		Logger: LoggerConfig,
+		Feed:   NsqFeed,
 	}
 )
 
 // Config represents application configuration structure.
 type Config struct {
 	Logger logger.Config
-	Feed   feed.Config
+	Feed   feeds.Config
 }
 
 // FromReader fills Config structure `c` passed by reference with
