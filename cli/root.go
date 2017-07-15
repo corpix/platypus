@@ -1,7 +1,11 @@
 package cli
 
 import (
+	"time"
+
 	"github.com/urfave/cli"
+
+	"github.com/cryptounicorns/market-fetcher-http/http"
 )
 
 var (
@@ -25,5 +29,16 @@ var (
 
 // RootAction is executing when program called without any subcommand.
 func RootAction(c *cli.Context) error {
-	select {}
+	var (
+		server = http.New(log, Config.HTTP)
+		err    error
+	)
+
+	for {
+		err = server.Serve()
+		if err != nil {
+			log.Error(err)
+			time.Sleep(1 * time.Second)
+		}
+	}
 }

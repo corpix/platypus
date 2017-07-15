@@ -10,6 +10,7 @@ import (
 
 	"github.com/cryptounicorns/market-fetcher-http/feeds"
 	"github.com/cryptounicorns/market-fetcher-http/feeds/feed/nsq"
+	"github.com/cryptounicorns/market-fetcher-http/http"
 	"github.com/cryptounicorns/market-fetcher-http/logger"
 )
 
@@ -23,21 +24,27 @@ var (
 		},
 	)
 
-	// NsqFeed represents default nsq feed config.
-	NsqFeed = feeds.Config{
+	// FeedConfig represents default feed config.
+	FeedConfig = feeds.Config{
 		Type: feeds.NsqFeedType,
 		Nsq:  NsqConfig,
 	}
 
-	// LoggerConfig represents default configuration for a logger.
+	// LoggerConfig represents default logger config.
 	LoggerConfig = logger.Config{
 		Level: "info",
 	}
 
-	// Default represents default application configuration.
+	// HTTPConfig represents default http server config.
+	HTTPConfig = http.Config{
+		Addr: ":8080",
+	}
+
+	// Default represents default application config.
 	Default = Config{
 		Logger: LoggerConfig,
-		Feed:   NsqFeed,
+		Feed:   FeedConfig,
+		HTTP:   HTTPConfig,
 	}
 )
 
@@ -45,6 +52,7 @@ var (
 type Config struct {
 	Logger logger.Config
 	Feed   feeds.Config
+	HTTP   http.Config
 }
 
 // FromReader fills Config structure `c` passed by reference with

@@ -1,5 +1,5 @@
 hash: b73e5fe59aef61fd10b68fc7689966f620811b5b4e07e0f9b3bc5e823b150a62
-updated: 2017-07-15T04:19:23.607494194Z
+updated: 2017-07-15T14:23:29.203883922Z
 imports:
 - name: github.com/bitly/go-nsq
   version: 973bf9a2952ff7e38071ae8392b73e4418503059
@@ -33,6 +33,10 @@ imports:
   version: 7e5a8eef611ee84dd359503f3969f80df4c50723
 - name: github.com/golang/snappy
   version: 553a641470496b2327abcac10b36396bd98e45c9
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/gorilla/mux
+  version: ac112f7d75a0714af1bd86ab17749b31f7809640
 - name: github.com/jinzhu/copier
   version: 8bfca8a02a0ce12119cdc4974143c834ca589257
 - name: github.com/pierrec/lz4
