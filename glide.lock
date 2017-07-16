@@ -1,5 +1,5 @@
 hash: b73e5fe59aef61fd10b68fc7689966f620811b5b4e07e0f9b3bc5e823b150a62
-updated: 2017-07-15T14:23:29.203883922Z
+updated: 2017-07-16T06:58:09.415739027Z
 imports:
 - name: github.com/bitly/go-nsq
   version: 973bf9a2952ff7e38071ae8392b73e4418503059
@@ -11,7 +11,7 @@ imports:
   - logrus
   - target/logrus
 - name: github.com/corpix/queues
-  version: d510b6db83fa464480340c1c3b73de8af9747068
+  version: f03f43145b4c5685bca38ef6d0e75fc2ba9a80a3
   subpackages:
   - handler
   - message

@@ -24,12 +24,12 @@ type Config struct {
 }
 
 type Queue interface {
-	Produce(message message.Message) error
+	Produce(message.Message) error
 	Consume(handler.Handler) error
 	Close() error
 }
 
-func NewFromConfig(l logger.Logger, c Config) (Queue, error) {
+func NewFromConfig(c Config, l logger.Logger) (Queue, error) {
 	var (
 		t = strings.ToLower(c.Type)
 	)
