@@ -33,14 +33,14 @@ var (
 // RootAction is executing when program called without any subcommand.
 func RootAction(c *cli.Context) error {
 	var (
-		fmt formats.Format
-		f   *feeds.Feeds
-		t   *datasources.Ticker
-		s   *http.Server
-		err error
+		fmts formats.Format
+		f    *feeds.Feeds
+		d    *datasources.Datasources
+		s    *http.Server
+		err  error
 	)
 
-	fmt, err = formats.New(Config.Feeds.Format)
+	fmts, err = formats.New(Config.Feeds.Format)
 	if err != nil {
 		return err
 	}
@@ -53,20 +53,14 @@ func RootAction(c *cli.Context) error {
 		return err
 	}
 
-	t, err = datasources.NewTicker(
-		f.Ticker,
-		fmt,
-		log,
-	)
+	d, err = datasources.New(f, fmts, log)
 	if err != nil {
 		return err
 	}
 
 	s = http.New(
 		Config.HTTP,
-		datasources.Datasources{
-			Ticker: t,
-		},
+		d,
 		log,
 	)
 

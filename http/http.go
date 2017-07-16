@@ -15,7 +15,7 @@ type Config struct {
 
 type Server struct {
 	config      Config
-	datasources datasources.Datasources
+	datasources *datasources.Datasources
 	logger      logger.Logger
 }
 
@@ -26,7 +26,7 @@ func (s *Server) Serve() error {
 	return http.ListenAndServe(s.config.Addr, r)
 }
 
-func New(c Config, d datasources.Datasources, l logger.Logger) *Server {
+func New(c Config, d *datasources.Datasources, l logger.Logger) *Server {
 	return &Server{
 		config:      c,
 		datasources: d,
