@@ -3,6 +3,7 @@ package feeds
 import (
 	"github.com/corpix/logger"
 	"github.com/corpix/queues"
+	"github.com/corpix/queues/handler"
 )
 
 const (
@@ -11,7 +12,10 @@ const (
 )
 
 type Config queues.Config
-type Feed queues.Queue
+type Feed interface {
+	Consume(handler.Handler) error
+	Close() error
+}
 
 func NewFromConfig(l logger.Logger, c Config) (Feed, error) {
 	return queues.NewFromConfig(
