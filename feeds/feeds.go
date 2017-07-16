@@ -6,20 +6,35 @@ import (
 	"github.com/corpix/queues/handler"
 )
 
-const (
-	NsqFeedType   = queues.NsqQueueType
-	KafkaFeedType = queues.KafkaQueueType
-)
+type Config struct {
+	Format string
+	Ticker queues.Config
+}
 
-type Config queues.Config
 type Feed interface {
 	Consume(handler.Handler) error
 	Close() error
 }
 
-func NewFromConfig(l logger.Logger, c Config) (Feed, error) {
-	return queues.NewFromConfig(
-		l,
-		queues.Config(c),
+type Feeds struct {
+	Ticker Feed
+}
+
+func NewFromConfig(c Config, l logger.Logger) (*Feeds, error) {
+	var (
+		ticker Feed
+		err    error
 	)
+
+	ticker, err = queues.NewFromConfig(
+		c.Ticker,
+		l,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Feeds{
+		Ticker: ticker,
+	}, nil
 }

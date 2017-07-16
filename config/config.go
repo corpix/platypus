@@ -6,28 +6,30 @@ import (
 	"os"
 
 	"github.com/corpix/formats"
+	"github.com/corpix/queues"
+	"github.com/corpix/queues/queue/nsq"
 	"github.com/jinzhu/copier"
 
 	"github.com/cryptounicorns/market-fetcher-http/feeds"
-	"github.com/cryptounicorns/market-fetcher-http/feeds/feed/nsq"
 	"github.com/cryptounicorns/market-fetcher-http/http"
 	"github.com/cryptounicorns/market-fetcher-http/logger"
 )
 
 var (
-	// NsqConfig represents default nsq config.
-	NsqConfig = nsq.WrapConfig(
-		nsq.Config{
+	// TickerFeedConfig represents default ticker feed config.
+	TickerFeedConfig = queues.Config{
+		Type: queues.NsqQueueType,
+		Nsq: nsq.Config{
 			Addr:    "127.0.0.1:4150",
 			Topic:   "ticker",
 			Channel: "market-fetcher-http",
 		},
-	)
+	}
 
-	// FeedConfig represents default feed config.
-	FeedConfig = feeds.Config{
-		Type: feeds.NsqFeedType,
-		Nsq:  NsqConfig,
+	// FeedsConfig represents default feeds config.
+	FeedsConfig = feeds.Config{
+		Format: "json",
+		Ticker: TickerFeedConfig,
 	}
 
 	// LoggerConfig represents default logger config.
@@ -43,7 +45,7 @@ var (
 	// Default represents default application config.
 	Default = Config{
 		Logger: LoggerConfig,
-		Feed:   FeedConfig,
+		Feeds:  FeedsConfig,
 		HTTP:   HTTPConfig,
 	}
 )
@@ -51,7 +53,7 @@ var (
 // Config represents application configuration structure.
 type Config struct {
 	Logger logger.Config
-	Feed   feeds.Config
+	Feeds  feeds.Config
 	HTTP   http.Config
 }
 

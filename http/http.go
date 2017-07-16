@@ -5,6 +5,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/cryptounicorns/market-fetcher-http/datasources"
 	"github.com/cryptounicorns/market-fetcher-http/logger"
 )
 
@@ -13,8 +14,9 @@ type Config struct {
 }
 
 type Server struct {
-	config Config
-	logger logger.Logger
+	config      Config
+	datasources datasources.Datasources
+	logger      logger.Logger
 }
 
 func (s *Server) Serve() error {
@@ -24,9 +26,10 @@ func (s *Server) Serve() error {
 	return http.ListenAndServe(s.config.Addr, r)
 }
 
-func New(l logger.Logger, c Config) *Server {
+func New(c Config, d datasources.Datasources, l logger.Logger) *Server {
 	return &Server{
-		config: c,
-		logger: l,
+		config:      c,
+		datasources: d,
+		logger:      l,
 	}
 }
