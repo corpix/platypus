@@ -1,24 +1,24 @@
 hash: b73e5fe59aef61fd10b68fc7689966f620811b5b4e07e0f9b3bc5e823b150a62
-updated: 2017-07-17T16:52:09.948336078Z
+updated: 2017-07-17T21:18:07.149866311Z
 imports:
 - name: github.com/bitly/go-nsq
   version: 973bf9a2952ff7e38071ae8392b73e4418503059
 - name: github.com/corpix/formats
-  version: b3eae9c16eb4fb111bd1b85c0a2a141987c7c001
+  version: db532770e3ecf9dfe31ce2f7bf30c1c26f67e417
 - name: github.com/corpix/logger
-  version: e0b96bbd5e2d9d561485a1a375b3242cde1d5f83
+  version: 143b9234f91396658f50b727c96c064aa9404d96
   subpackages:
   - logrus
   - target/logrus
 - name: github.com/corpix/queues
-  version: b9b8fcbaa781b0965317127771485e1bc7b0f17e
+  version: 16f36e2e51cdcb0f5292c2ce91794d555a6d514a
   subpackages:
   - handler
   - message
   - queue/kafka
   - queue/nsq
 - name: github.com/corpix/trade
-  version: ce7a6b062eaa1428e3c0cc964eee2ac6ede47d06
+  version: af7797357d5f5ed2d165b2f0bfce307fc44aeb28
   subpackages:
   - errors
   - market
