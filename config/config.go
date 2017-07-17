@@ -20,9 +20,10 @@ var (
 	TickerFeedConfig = queues.Config{
 		Type: queues.NsqQueueType,
 		Nsq: nsq.Config{
-			Addr:    "127.0.0.1:4150",
-			Topic:   "ticker",
-			Channel: "market-fetcher-http",
+			Addr:     "127.0.0.1:4150",
+			Topic:    "ticker",
+			Channel:  "market-fetcher-http",
+			LogLevel: nsq.LogLevelInfo,
 		},
 	}
 

@@ -48,6 +48,7 @@ func (t *Ticker) Close() {
 func NewTicker(feed feeds.Feed, format formats.Format, log logger.Logger) (*Ticker, error) {
 	ticker := &Ticker{
 		Feed:   make(chan *market.Ticker),
+		Store:  warehouse.New(),
 		format: format,
 		log:    log,
 	}
