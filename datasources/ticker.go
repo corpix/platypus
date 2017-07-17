@@ -38,11 +38,14 @@ func (t *Ticker) Consume(m message.Message) {
 	)
 	select {
 	case t.Feed <- ticker:
+	default:
 	}
+
 }
 
 func (t *Ticker) Close() error {
 	close(t.Feed)
+	return nil
 }
 
 func NewTicker(feed feeds.Feed, format formats.Format, log logger.Logger) (*Ticker, error) {
