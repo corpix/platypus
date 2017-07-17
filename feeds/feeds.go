@@ -20,6 +20,19 @@ type Feeds struct {
 	Ticker Feed
 }
 
+func (fs *Feeds) Close() error {
+	var (
+		err error
+	)
+
+	err = fs.Ticker.Close()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewFromConfig(c Config, l logger.Logger) (*Feeds, error) {
 	var (
 		ticker Feed

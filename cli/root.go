@@ -52,11 +52,13 @@ func RootAction(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
 	d, err = datasources.New(f, fmts, log)
 	if err != nil {
 		return err
 	}
+	defer d.Close()
 
 	s = http.New(
 		Config.HTTP,

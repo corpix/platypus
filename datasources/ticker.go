@@ -41,7 +41,7 @@ func (t *Ticker) Consume(m message.Message) {
 	}
 }
 
-func (t *Ticker) Close() {
+func (t *Ticker) Close() error {
 	close(t.Feed)
 }
 

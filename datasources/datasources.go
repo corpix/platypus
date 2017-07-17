@@ -11,8 +11,17 @@ type Datasources struct {
 	*Ticker
 }
 
-func (d *Datasources) Close() {
-	d.Ticker.Close()
+func (d *Datasources) Close() error {
+	var (
+		err error
+	)
+
+	err = d.Ticker.Close()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func New(f *feeds.Feeds, fmts formats.Format, log logger.Logger) (*Datasources, error) {
