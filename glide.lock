@@ -1,22 +1,27 @@
 hash: b73e5fe59aef61fd10b68fc7689966f620811b5b4e07e0f9b3bc5e823b150a62
-updated: 2017-07-16T06:58:09.415739027Z
+updated: 2017-07-17T16:52:09.948336078Z
 imports:
 - name: github.com/bitly/go-nsq
   version: 973bf9a2952ff7e38071ae8392b73e4418503059
 - name: github.com/corpix/formats
   version: b3eae9c16eb4fb111bd1b85c0a2a141987c7c001
 - name: github.com/corpix/logger
-  version: 82e27f85c8a48ce6edadfeb7848ba7ecb01756d3
+  version: e0b96bbd5e2d9d561485a1a375b3242cde1d5f83
   subpackages:
   - logrus
   - target/logrus
 - name: github.com/corpix/queues
-  version: f03f43145b4c5685bca38ef6d0e75fc2ba9a80a3
+  version: b9b8fcbaa781b0965317127771485e1bc7b0f17e
   subpackages:
   - handler
   - message
   - queue/kafka
   - queue/nsq
+- name: github.com/corpix/trade
+  version: ce7a6b062eaa1428e3c0cc964eee2ac6ede47d06
+  subpackages:
+  - errors
+  - market
 - name: github.com/davecgh/go-spew
   version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
@@ -39,6 +44,8 @@ imports:
   version: ac112f7d75a0714af1bd86ab17749b31f7809640
 - name: github.com/jinzhu/copier
   version: 8bfca8a02a0ce12119cdc4974143c834ca589257
+- name: github.com/orcaman/concurrent-map
+  version: 2ae17bc4c860c83513ee50feb9746f3e50d7515d
 - name: github.com/pierrec/lz4
   version: 5a3d2245f97fc249850e7802e3c01fad02a1c316
 - name: github.com/pierrec/xxHash
