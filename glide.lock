@@ -1,8 +1,8 @@
 hash: b73e5fe59aef61fd10b68fc7689966f620811b5b4e07e0f9b3bc5e823b150a62
-updated: 2017-07-17T21:18:07.149866311Z
+updated: 2017-08-05T13:36:35.631267936Z
 imports:
 - name: github.com/bitly/go-nsq
-  version: 973bf9a2952ff7e38071ae8392b73e4418503059
+  version: eee57a3ac4174c55924125bb15eeeda8cffb6e6f
 - name: github.com/corpix/formats
   version: db532770e3ecf9dfe31ce2f7bf30c1c26f67e417
 - name: github.com/corpix/logger
@@ -10,11 +10,16 @@ imports:
   subpackages:
   - logrus
   - target/logrus
+- name: github.com/corpix/pool
+  version: 2396288b6b816f5330c0b92798177655e2509d06
 - name: github.com/corpix/queues
-  version: 16f36e2e51cdcb0f5292c2ce91794d555a6d514a
+  version: 1e630bc6d904833ef43c7c3b3d1193ebc2062593
   subpackages:
+  - consumer
+  - errors
   - handler
   - message
+  - queue/channel
   - queue/kafka
   - queue/nsq
 - name: github.com/corpix/trade
@@ -36,6 +41,17 @@ imports:
   version: 44cc805cf13205b55f69e14bcb69867d1ae92f98
 - name: github.com/fatih/structs
   version: 7e5a8eef611ee84dd359503f3969f80df4c50723
+- name: github.com/gobwas/httphead
+  version: d8ef83dd38eff6fae44a0397340fd8a42ffd6664
+- name: github.com/gobwas/pool
+  version: 971a66ef9204d674b917bb1c5a6866779f971aaa
+  subpackages:
+  - pbufio
+  - pbytes
+- name: github.com/gobwas/ws
+  version: c7a54132e47d7958496e582b2439063a339df621
+  subpackages:
+  - wsutil
 - name: github.com/golang/snappy
   version: 553a641470496b2327abcac10b36396bd98e45c9
 - name: github.com/gorilla/context
@@ -61,9 +77,17 @@ imports:
 - name: github.com/urfave/cli
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
 - name: golang.org/x/sys
-  version: 4cd6d1a821c7175768725b55ca82f14683a29ea4
+  version: d8f5ea21b9295e315e612b4bcf4bedea93454d4d
   subpackages:
   - unix
 - name: gopkg.in/yaml.v2
-  version: 3b4ad1db5b2a649883ff3782f5f9f6fb52be71af
-testImports: []
+  version: 25c4ec802a7d637f88d584ab26798e94ad14c13b
+testImports:
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: 05e8a0eda380579888eb53c394909df027f06991
+  subpackages:
+  - assert
