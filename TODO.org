@@ -41,3 +41,4 @@ exit status 2
 * TODO Find a good way to clean up writerpool
   (Some pipes could be broken)
 * TODO Drain websocket read queue
+* TODO Docker infrastructure
