@@ -43,4 +43,6 @@ exit status 2
 * TODO Drain websocket read queue
 * TODO Test with autobahn in travis
   https://github.com/crossbario/autobahn-testsuite
+* TODO Review API reply models
+  I see this service as a general-purpose thing. So API replies should fit this idea.
 * TODO Docker infrastructure
