@@ -1,0 +1,43 @@
+* TODO Panics if queue is not available
+    #+BEGIN_SRC console
+go run ./market-fetcher-http/market-fetcher-http.go
+INFO[0000] Starting server on ':8080'...
+INFO[0000] INF    2 [ticker/market-fetcher-http] (127.0.0.1:4150) connecting to nsqd
+ERRO[0000] dial tcp 127.0.0.1:4150: getsockopt: connection refused
+INFO[0001] Starting server on ':8080'...
+INFO[0001] INF    1 stopping
+INFO[0001] INF    2 [ticker/market-fetcher-http] stopping...
+INFO[0001] INF    2 [ticker/market-fetcher-http] stopping handlers
+INFO[0001] INF    2 [ticker/market-fetcher-http] rdyLoop exiting
+panic: already connected
+
+goroutine 1 [running]:
+github.com/corpix/queues/vendor/github.com/bitly/go-nsq.(*Consumer).AddConcurrentHandlers(0xc4200be600, 0xb2f440, 0xc420186210, 0x1)
+	/home/user/Projects/src/github.com/corpix/queues/vendor/github.com/bitly/go-nsq/consumer.go:1082 +0xec
+github.com/corpix/queues/vendor/github.com/bitly/go-nsq.(*Consumer).AddHandler(0xc4200be600, 0xb2f440, 0xc420186210)
+	/home/user/Projects/src/github.com/corpix/queues/vendor/github.com/bitly/go-nsq/consumer.go:1070 +0x48
+github.com/corpix/queues/queue/nsq.(*Nsq).Consume(0xc420061680, 0xc420186210, 0x2540be400, 0x80)
+	/home/user/Projects/src/github.com/corpix/queues/queue/nsq/nsq.go:27 +0x45
+github.com/cryptounicorns/market-fetcher-http/http/api/v1.NewTickers(0x913874, 0x4, 0x9140bb, 0x6, 0x0, 0x91518f, 0x9, 0x2540be400, 0x80, 0x400, ...)
+	/home/user/Projects/src/github.com/cryptounicorns/market-fetcher-http/http/api/v1/tickers.go:186 +0x582
+github.com/cryptounicorns/market-fetcher-http/http/api/v1.New(0x913874, 0x4, 0x9140bb, 0x6, 0x0, 0x91518f, 0x9, 0x2540be400, 0x80, 0x400, ...)
+	/home/user/Projects/src/github.com/cryptounicorns/market-fetcher-http/http/api/v1/v1.go:52 +0x1f1
+github.com/cryptounicorns/market-fetcher-http/http/api.New(0x913874, 0x4, 0x9140bb, 0x6, 0x0, 0x91518f, 0x9, 0x2540be400, 0x80, 0x400, ...)
+	/home/user/Projects/src/github.com/cryptounicorns/market-fetcher-http/http/api/api.go:44 +0x1e5
+github.com/cryptounicorns/market-fetcher-http/http.(*Server).Serve(0xc42004bc50, 0xc420117270, 0x1)
+	/home/user/Projects/src/github.com/cryptounicorns/market-fetcher-http/http/http.go:32 +0x1bd
+github.com/cryptounicorns/market-fetcher-http/cli.RootAction(0xc42010e140, 0x0, 0x0)
+	/home/user/Projects/src/github.com/cryptounicorns/market-fetcher-http/cli/root.go:58 +0x1ea
+github.com/urfave/cli.HandleAction(0x86dc60, 0x92e690, 0xc42010e140, 0xc420061380, 0x0)
+	/home/user/Projects/src/github.com/urfave/cli/app.go:485 +0xd4
+github.com/urfave/cli.(*App).Run(0xc42009c820, 0xc420010260, 0x1, 0x1, 0x0, 0x0)
+	/home/user/Projects/src/github.com/urfave/cli/app.go:259 +0x70d
+github.com/cryptounicorns/market-fetcher-http/cli.Execute()
+	/home/user/Projects/src/github.com/cryptounicorns/market-fetcher-http/cli/cli.go:60 +0x192
+main.main()
+	/home/user/Projects/src/github.com/cryptounicorns/market-fetcher-http/market-fetcher-http/market-fetcher-http.go:10 +0x20
+exit status 2
+    #+END_SRC
+* TODO Find a good way to clean up writerpool
+  (Some pipes could be broken)
+* TODO Drain websocket read queue

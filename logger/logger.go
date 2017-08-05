@@ -6,8 +6,7 @@ import (
 )
 
 type Config logrus.Config
-type Logger logger.Logger
 
-func New(c Config) (Logger, error) {
+func New(c Config) (logger.Logger, error) {
 	return logrus.NewFromConfig(logrus.Config(c))
 }

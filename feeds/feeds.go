@@ -3,21 +3,10 @@ package feeds
 import (
 	"github.com/corpix/logger"
 	"github.com/corpix/queues"
-	"github.com/corpix/queues/handler"
 )
 
-type Config struct {
-	Format string
-	Ticker queues.Config
-}
-
-type Feed interface {
-	Consume(handler.Handler) error
-	Close() error
-}
-
 type Feeds struct {
-	Ticker Feed
+	Tickers queues.Queue
 }
 
 func (fs *Feeds) Close() error {
@@ -25,7 +14,7 @@ func (fs *Feeds) Close() error {
 		err error
 	)
 
-	err = fs.Ticker.Close()
+	err = fs.Tickers.Close()
 	if err != nil {
 		return err
 	}
@@ -33,14 +22,14 @@ func (fs *Feeds) Close() error {
 	return nil
 }
 
-func NewFromConfig(c Config, l logger.Logger) (*Feeds, error) {
+func New(c Config, l logger.Logger) (*Feeds, error) {
 	var (
-		ticker Feed
-		err    error
+		tickers queues.Queue
+		err     error
 	)
 
-	ticker, err = queues.NewFromConfig(
-		c.Ticker,
+	tickers, err = queues.NewFromConfig(
+		c.Tickers,
 		l,
 	)
 	if err != nil {
@@ -48,6 +37,6 @@ func NewFromConfig(c Config, l logger.Logger) (*Feeds, error) {
 	}
 
 	return &Feeds{
-		Ticker: ticker,
+		Tickers: tickers,
 	}, nil
 }

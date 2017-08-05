@@ -5,11 +5,12 @@ import (
 	builtinLogger "log"
 	"os"
 
+	"github.com/corpix/logger"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/urfave/cli"
 
 	"github.com/cryptounicorns/market-fetcher-http/config"
-	"github.com/cryptounicorns/market-fetcher-http/logger"
+	appLogger "github.com/cryptounicorns/market-fetcher-http/logger"
 )
 
 var (
@@ -83,7 +84,7 @@ func initLogger(c *cli.Context) error {
 		Config.Logger.Level = "debug"
 	}
 
-	log, err = logger.New(Config.Logger)
+	log, err = appLogger.New(Config.Logger)
 	if err != nil {
 		return err
 	}

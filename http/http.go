@@ -3,40 +3,54 @@ package http
 import (
 	"net/http"
 
+	"github.com/corpix/logger"
 	"github.com/gorilla/mux"
 
-	"github.com/cryptounicorns/market-fetcher-http/datasources"
-	"github.com/cryptounicorns/market-fetcher-http/http/handlers/v1"
-	"github.com/cryptounicorns/market-fetcher-http/logger"
+	"github.com/cryptounicorns/market-fetcher-http/errors"
+	"github.com/cryptounicorns/market-fetcher-http/feeds"
+	"github.com/cryptounicorns/market-fetcher-http/http/api"
 )
 
-type Config struct {
-	Addr string
-}
-
 type Server struct {
-	config      Config
-	datasources *datasources.Datasources
-	log         logger.Logger
+	Config
+	Feeds *feeds.Feeds
+	log   logger.Logger
 }
 
 func (s *Server) Serve() error {
+	s.log.Printf(
+		"Starting server on '%s'...",
+		s.Config.Addr,
+	)
 	r := mux.NewRouter()
 
-	v1.Mount(
-		r.PathPrefix("/api").Subrouter(),
-		s.datasources,
+	_, err := api.New(
+		s.Config.Api,
+		r,
+		s.Feeds,
 		s.log,
 	)
+	if err != nil {
+		return err
+	}
 
-	s.log.Printf("Starting server on '%s'...", s.config.Addr)
-	return http.ListenAndServe(s.config.Addr, r)
+	return http.ListenAndServe(
+		s.Config.Addr,
+		r,
+	)
 }
 
-func New(c Config, d *datasources.Datasources, l logger.Logger) *Server {
-	return &Server{
-		config:      c,
-		datasources: d,
-		log:         l,
+func New(c Config, f *feeds.Feeds, l logger.Logger) (*Server, error) {
+	if f == nil {
+		return nil, errors.NewErrNilArgument(f)
 	}
+	if l == nil {
+		return nil, errors.NewErrNilArgument(l)
+	}
+
+	return &Server{
+		Config: c,
+		Feeds:  f,
+		log:    l,
+	}, nil
 }

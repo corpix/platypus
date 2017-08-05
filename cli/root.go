@@ -3,10 +3,8 @@ package cli
 import (
 	"time"
 
-	"github.com/corpix/formats"
 	"github.com/urfave/cli"
 
-	"github.com/cryptounicorns/market-fetcher-http/datasources"
 	"github.com/cryptounicorns/market-fetcher-http/feeds"
 	"github.com/cryptounicorns/market-fetcher-http/http"
 )
@@ -33,20 +31,13 @@ var (
 // RootAction is executing when program called without any subcommand.
 func RootAction(c *cli.Context) error {
 	var (
-		fmts formats.Format
-		f    *feeds.Feeds
-		d    *datasources.Datasources
-		s    *http.Server
-		err  error
+		f   *feeds.Feeds
+		s   *http.Server
+		err error
 	)
 
-	fmts, err = formats.New(Config.Feeds.Format)
-	if err != nil {
-		return err
-	}
-
-	f, err = feeds.NewFromConfig(
-		Config.Feeds,
+	f, err = feeds.New(
+		Config.Feed,
 		log,
 	)
 	if err != nil {
@@ -54,17 +45,14 @@ func RootAction(c *cli.Context) error {
 	}
 	defer f.Close()
 
-	d, err = datasources.New(f, fmts, log)
+	s, err = http.New(
+		Config.HTTP,
+		f,
+		log,
+	)
 	if err != nil {
 		return err
 	}
-	defer d.Close()
-
-	s = http.New(
-		Config.HTTP,
-		d,
-		log,
-	)
 
 	for {
 		err = s.Serve()

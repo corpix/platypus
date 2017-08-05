@@ -4,49 +4,72 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/corpix/formats"
+	"github.com/corpix/pool"
 	"github.com/corpix/queues"
 	"github.com/corpix/queues/queue/nsq"
 	"github.com/jinzhu/copier"
 
+	"github.com/cryptounicorns/market-fetcher-http/consumer"
 	"github.com/cryptounicorns/market-fetcher-http/feeds"
 	"github.com/cryptounicorns/market-fetcher-http/http"
+	api "github.com/cryptounicorns/market-fetcher-http/http/api/config"
 	"github.com/cryptounicorns/market-fetcher-http/logger"
+	"github.com/cryptounicorns/market-fetcher-http/stores"
+	"github.com/cryptounicorns/market-fetcher-http/stores/store/memory"
+	"github.com/cryptounicorns/market-fetcher-http/transmitters"
+	"github.com/cryptounicorns/market-fetcher-http/transmitters/transmitter/broadcast"
 )
 
 var (
-	// TickerFeedConfig represents default ticker feed config.
-	TickerFeedConfig = queues.Config{
-		Type: queues.NsqQueueType,
-		Nsq: nsq.Config{
-			Addr:     "127.0.0.1:4150",
-			Topic:    "ticker",
-			Channel:  "market-fetcher-http",
-			LogLevel: nsq.LogLevelInfo,
-		},
-	}
-
-	// FeedsConfig represents default feeds config.
-	FeedsConfig = feeds.Config{
-		Format: "json",
-		Ticker: TickerFeedConfig,
-	}
-
 	// LoggerConfig represents default logger config.
 	LoggerConfig = logger.Config{
 		Level: "info",
 	}
 
+	// FeedConfig represents default data sources config.
+	FeedConfig = feeds.Config{
+		Tickers: queues.Config{
+			Type: queues.NsqQueueType,
+			Nsq: nsq.Config{
+				Addr:     "127.0.0.1:4150",
+				Topic:    "ticker",
+				Channel:  "market-fetcher-http",
+				LogLevel: nsq.LogLevelInfo,
+			},
+		},
+	}
+
 	// HTTPConfig represents default http server config.
 	HTTPConfig = http.Config{
 		Addr: ":8080",
+		Api: api.Config{
+			Consumer: consumer.Config{
+				Format: "json",
+			},
+			Store: stores.Config{
+				Type:   stores.MemoryStoreType,
+				Memory: memory.Config{},
+			},
+			Transmitter: transmitters.Config{
+				Type: transmitters.BroadcastTransmitterType,
+				Broadcast: broadcast.Config{
+					WriteTimeout: 10 * time.Second,
+					Pool: pool.Config{
+						Workers:   128,
+						QueueSize: 1024,
+					},
+				},
+			},
+		},
 	}
 
 	// Default represents default application config.
 	Default = Config{
 		Logger: LoggerConfig,
-		Feeds:  FeedsConfig,
+		Feed:   FeedConfig,
 		HTTP:   HTTPConfig,
 	}
 )
@@ -54,7 +77,7 @@ var (
 // Config represents application configuration structure.
 type Config struct {
 	Logger logger.Config
-	Feeds  feeds.Config
+	Feed   feeds.Config
 	HTTP   http.Config
 }
 
@@ -68,6 +91,7 @@ func FromReader(f formats.Format, r io.Reader, c *Config) error {
 		return err
 	}
 
+	// FIXME: Deep merge required
 	err = copier.Copy(c, Default)
 	if err != nil {
 		return err
