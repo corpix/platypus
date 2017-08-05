@@ -41,4 +41,6 @@ exit status 2
 * TODO Find a good way to clean up writerpool
   (Some pipes could be broken)
 * TODO Drain websocket read queue
+* TODO Test with autobahn in travis
+  https://github.com/crossbario/autobahn-testsuite
 * TODO Docker infrastructure
