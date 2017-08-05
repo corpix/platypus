@@ -1,9 +1,9 @@
-market-fetcher
+market-fetcher-http
 ---------
 
-[![Build Status](https://travis-ci.org/corpix/market-fetcher.svg?branch=master)](https://travis-ci.org/corpix/market-fetcher)
+[![Build Status](https://travis-ci.org/cryptounicorns/market-fetcher-http.svg?branch=master)](https://travis-ci.org/cryptounicorns/market-fetcher-http)
 
-Fetches crypto currency market data and streams it into configured endpoint.
+HTTP interface for data providen by [market-fetcher](https://github.com/corpix/market-fetcher).
 
 ## Development
 
@@ -23,5 +23,16 @@ sudo rkt run --net=host --interactive corpix.github.io/nsq:1.0.0 -- nsq_tail --n
 At this point you should be ready to run an application:
 
 ``` bash
-go run ./market-fetcher/market-fetcher.go --debug
+go run ./market-fetcher-http/market-fetcher-http.go --debug
+```
+
+## Testing
+
+> wsd is https://github.com/alexanderGugel/wsd
+
+``` bash
+wsd -url ws://127.0.0.1:8080/api/v1/tickers/stream
+# < {"High":45.000001,"Low":41.35,"Avg":43.175001,"Vol":13157.821,"VolCur":302.6894,"Last":44.7,"Buy":44.749501,"Sell":44.978,"Timestamp":1501939951,"CurrencyPair":"LTC-USD","Market":"yobit"}
+#< {"High":2720,"Low":2504,"Avg":2612,"Vol":1608422.4,"VolCur":616.98825,"Last":2720,"Buy":2670,"Sell":2720,"Timestamp":1501939978,"CurrencyPair":"LTC-RUB","Market":"yobit"}
+# ...
 ```
