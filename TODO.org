@@ -42,6 +42,8 @@ exit status 2
   CLOSED: [2017-08-07 Mon 07:28]
   (Some pipes could be broken)
 * TODO Drain websocket read queue
+* TODO Handle pings
+  Handle websocket ping ops
 * TODO Test with autobahn in travis
   https://github.com/crossbario/autobahn-testsuite
 * TODO Review API reply models
