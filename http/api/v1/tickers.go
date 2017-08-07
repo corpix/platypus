@@ -15,6 +15,7 @@ import (
 
 	"github.com/cryptounicorns/market-fetcher-http/errors"
 	"github.com/cryptounicorns/market-fetcher-http/http/api/config"
+	apiTransmitter "github.com/cryptounicorns/market-fetcher-http/http/api/transmitter"
 	"github.com/cryptounicorns/market-fetcher-http/stores"
 	"github.com/cryptounicorns/market-fetcher-http/transmitters"
 	"github.com/cryptounicorns/market-fetcher-http/writerpool"
@@ -109,7 +110,12 @@ func (t *Tickers) pump() {
 			break
 		case m := <-feed:
 			key = m.(*market.Ticker).CurrencyPair.String()
-			t.Store.Set(key, m)
+			err = t.Store.Set(key, m)
+			if err != nil {
+				// XXX: If we can't set into store
+				// then it is not critical, just log and go on.
+				t.log.Error(err)
+			}
 
 			data, err = t.Format.Marshal(m)
 			if err != nil {
@@ -119,7 +125,6 @@ func (t *Tickers) pump() {
 
 			_, err = t.Transmitter.Write(data)
 			if err != nil {
-				// FIXME: Delete writer if broken pipe
 				t.log.Error(err)
 				continue
 			}
@@ -177,6 +182,7 @@ func NewTickers(c config.Config, r *mux.Router, q queues.Queue, l logger.Logger)
 		c.Transmitter,
 		ws,
 		wsutil.WriteServerText,
+		apiTransmitter.WriterPoolCleanerErrorHandler(ws, l),
 		l,
 	)
 	if err != nil {

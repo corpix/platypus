@@ -38,7 +38,8 @@ main.main()
 	/home/user/Projects/src/github.com/cryptounicorns/market-fetcher-http/market-fetcher-http/market-fetcher-http.go:10 +0x20
 exit status 2
     #+END_SRC
-* TODO Find a good way to clean up writerpool
+* DONE Find a good way to clean up writerpool
+  CLOSED: [2017-08-07 Mon 07:28]
   (Some pipes could be broken)
 * TODO Drain websocket read queue
 * TODO Test with autobahn in travis

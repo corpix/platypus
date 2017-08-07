@@ -9,11 +9,13 @@ import (
 	"github.com/corpix/pool"
 
 	"github.com/cryptounicorns/market-fetcher-http/errors"
+	"github.com/cryptounicorns/market-fetcher-http/transmitters/transmitter"
 	"github.com/cryptounicorns/market-fetcher-http/transmitters/writers"
 )
 
 type Broadcast struct {
-	log logger.Logger
+	log          logger.Logger
+	ErrorHandler transmitter.ErrorHandler
 
 	*pool.Pool
 	writers.Writers
@@ -28,7 +30,7 @@ func (b *Broadcast) worker(buf []byte, wg *sync.WaitGroup, c io.Writer, cancel c
 		default:
 			err := b.Writer(c, buf)
 			if err != nil {
-				b.log.Error(err)
+				b.ErrorHandler(c, err)
 			}
 			cancel()
 		}
@@ -70,22 +72,26 @@ func (b *Broadcast) Close() error {
 	return nil
 }
 
-func New(c Config, ws writers.Writers, w writers.Writer, l logger.Logger) (*Broadcast, error) {
+func New(c Config, ws writers.Writers, w writers.Writer, e transmitter.ErrorHandler, l logger.Logger) (*Broadcast, error) {
 	if ws == nil {
 		return nil, errors.NewErrNilArgument(ws)
 	}
 	if w == nil {
 		return nil, errors.NewErrNilArgument(w)
 	}
+	if e == nil {
+		return nil, errors.NewErrNilArgument(e)
+	}
 	if l == nil {
 		return nil, errors.NewErrNilArgument(l)
 	}
 
 	return &Broadcast{
-		log:     l,
-		Pool:    pool.NewFromConfig(c.Pool),
-		Writers: ws,
-		Writer:  w,
-		Config:  c,
+		log:          l,
+		Pool:         pool.NewFromConfig(c.Pool),
+		Writers:      ws,
+		Writer:       w,
+		ErrorHandler: e,
+		Config:       c,
 	}, nil
 }

@@ -4,4 +4,4 @@ import (
 	"io"
 )
 
-type Writer func(io.Writer, []byte) error
+type Writer func(w io.Writer, data []byte) error
