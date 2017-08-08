@@ -1,5 +1,5 @@
 hash: b73e5fe59aef61fd10b68fc7689966f620811b5b4e07e0f9b3bc5e823b150a62
-updated: 2017-08-08T17:08:01.056718216Z
+updated: 2017-08-08T19:19:20.5386191Z
 imports:
 - name: github.com/bitly/go-nsq
   version: 1336c299dd900d045fb6df51fc02adf26cde5414
@@ -13,7 +13,7 @@ imports:
 - name: github.com/corpix/pool
   version: 2396288b6b816f5330c0b92798177655e2509d06
 - name: github.com/corpix/queues
-  version: f4546cc042e01944683a173d544fae6573bc1bd1
+  version: 51419122976242b24d5d35e8074cd5dc1698bb40
   subpackages:
   - consumer
   - errors
