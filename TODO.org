@@ -1,4 +1,5 @@
-* TODO Panics if queue is not available
+* DONE Panics if queue is not available
+  CLOSED: [2017-08-08 Tue 21:04]
     #+BEGIN_SRC console
 go run ./market-fetcher-http/market-fetcher-http.go
 INFO[0000] Starting server on ':8080'...
