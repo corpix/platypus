@@ -10,7 +10,7 @@ import (
 	"github.com/corpix/pool"
 	"github.com/corpix/queues"
 	"github.com/corpix/queues/queue/nsq"
-	"github.com/jinzhu/copier"
+	"github.com/imdario/mergo"
 
 	"github.com/cryptounicorns/market-fetcher-http/consumer"
 	"github.com/cryptounicorns/market-fetcher-http/feeds"
@@ -91,8 +91,7 @@ func FromReader(f formats.Format, r io.Reader, c *Config) error {
 		return err
 	}
 
-	// FIXME: Deep merge required
-	err = copier.Copy(c, Default)
+	err = mergo.Merge(c, Default)
 	if err != nil {
 		return err
 	}

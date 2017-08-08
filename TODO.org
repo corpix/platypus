@@ -41,6 +41,8 @@ exit status 2
 * DONE Find a good way to clean up writerpool
   CLOSED: [2017-08-07 Mon 07:28]
   (Some pipes could be broken)
+* DONE Deep merge default config with user-specified
+  CLOSED: [2017-08-08 Tue 20:56]
 * TODO Drain websocket read queue
 * TODO Handle pings
   Handle websocket ping ops

@@ -1,5 +1,5 @@
 hash: b73e5fe59aef61fd10b68fc7689966f620811b5b4e07e0f9b3bc5e823b150a62
-updated: 2017-08-08T19:19:20.5386191Z
+updated: 2017-08-08T20:57:46.808483748Z
 imports:
 - name: github.com/bitly/go-nsq
   version: 1336c299dd900d045fb6df51fc02adf26cde5414
@@ -58,6 +58,8 @@ imports:
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: ac112f7d75a0714af1bd86ab17749b31f7809640
+- name: github.com/imdario/mergo
+  version: e3000cb3d28c72b837601cac94debd91032d19fe
 - name: github.com/jinzhu/copier
   version: 8bfca8a02a0ce12119cdc4974143c834ca589257
 - name: github.com/orcaman/concurrent-map
