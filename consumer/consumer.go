@@ -11,7 +11,7 @@ import (
 
 type Consumer struct {
 	consumer consumer.Consumer
-	*queues.UnmarshalConsumer
+	*consumer.UnmarshalConsumer
 }
 
 func (c *Consumer) Close() error {
@@ -30,7 +30,7 @@ func (c *Consumer) Close() error {
 func New(q queues.Queue, t interface{}, f formats.Format, l logger.Logger) (*Consumer, error) {
 	var (
 		c   consumer.Consumer
-		uc  *queues.UnmarshalConsumer
+		uc  *consumer.UnmarshalConsumer
 		err error
 	)
 
@@ -52,7 +52,7 @@ func New(q queues.Queue, t interface{}, f formats.Format, l logger.Logger) (*Con
 		return nil, err
 	}
 
-	uc, err = queues.NewUnmarshalConsumer(
+	uc, err = consumer.NewUnmarshalConsumer(
 		t,
 		c,
 		f,
