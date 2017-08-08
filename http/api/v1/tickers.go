@@ -7,12 +7,12 @@ import (
 	"github.com/corpix/formats"
 	"github.com/corpix/logger"
 	"github.com/corpix/queues"
-	"github.com/corpix/queues/consumer"
 	"github.com/corpix/trade/market"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
 	"github.com/gorilla/mux"
 
+	"github.com/cryptounicorns/market-fetcher-http/consumer"
 	"github.com/cryptounicorns/market-fetcher-http/errors"
 	"github.com/cryptounicorns/market-fetcher-http/http/api/config"
 	apiTransmitter "github.com/cryptounicorns/market-fetcher-http/http/api/transmitter"
@@ -29,7 +29,6 @@ type Tickers struct {
 	Transmitter transmitters.Transmitter
 	WriterPool  *writerpool.WriterPool
 	log         logger.Logger
-	done        chan bool
 }
 
 func (t *Tickers) Handle(rw http.ResponseWriter, r *http.Request) {
@@ -81,8 +80,6 @@ func (t *Tickers) Close() error {
 		err error
 	)
 
-	close(t.done)
-
 	err = t.Consumer.Close()
 	if err != nil {
 		return err
@@ -98,36 +95,30 @@ func (t *Tickers) Close() error {
 
 func (t *Tickers) pump() {
 	var (
-		feed = t.Consumer.GetFeed()
 		data []byte
 		key  string
 		err  error
 	)
 
-	for {
-		select {
-		case <-t.done:
-			break
-		case m := <-feed:
-			key = m.(*market.Ticker).CurrencyPair.String()
-			err = t.Store.Set(key, m)
-			if err != nil {
-				// XXX: If we can't set into store
-				// then it is not critical, just log and go on.
-				t.log.Error(err)
-			}
+	for m := range t.Consumer.Consume() {
+		key = m.(*market.Ticker).CurrencyPair.String()
+		err = t.Store.Set(key, m)
+		if err != nil {
+			// XXX: If we can't set into store
+			// then it is not critical, just log and go on.
+			t.log.Error(err)
+		}
 
-			data, err = t.Format.Marshal(m)
-			if err != nil {
-				t.log.Error(err)
-				continue
-			}
+		data, err = t.Format.Marshal(m)
+		if err != nil {
+			t.log.Error(err)
+			continue
+		}
 
-			_, err = t.Transmitter.Write(data)
-			if err != nil {
-				t.log.Error(err)
-				continue
-			}
+		_, err = t.Transmitter.Write(data)
+		if err != nil {
+			t.log.Error(err)
+			continue
 		}
 	}
 }
@@ -161,15 +152,6 @@ func NewTickers(c config.Config, r *mux.Router, q queues.Queue, l logger.Logger)
 		return nil, err
 	}
 
-	cr, err = consumer.New(
-		market.Ticker{},
-		f,
-		l,
-	)
-	if err != nil {
-		return nil, err
-	}
-
 	s, err = stores.New(
 		c.Store,
 		l,
@@ -189,9 +171,13 @@ func NewTickers(c config.Config, r *mux.Router, q queues.Queue, l logger.Logger)
 		return nil, err
 	}
 
-	err = q.Consume(cr.Handler)
+	cr, err = consumer.New(
+		q,
+		market.Ticker{},
+		f,
+		l,
+	)
 	if err != nil {
-		cr.Close()
 		return nil, err
 	}
 
@@ -203,7 +189,6 @@ func NewTickers(c config.Config, r *mux.Router, q queues.Queue, l logger.Logger)
 		Transmitter: t,
 		WriterPool:  ws,
 		log:         l,
-		done:        make(chan bool),
 	}
 
 	MountTickers(

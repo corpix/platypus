@@ -9,9 +9,28 @@ import (
 	"github.com/cryptounicorns/market-fetcher-http/errors"
 )
 
-func New(q queues.Queue, t interface{}, f formats.Format, l logger.Logger) (*consumer.Consumer, error) {
+type Consumer struct {
+	consumer consumer.Consumer
+	*queues.UnmarshalConsumer
+}
+
+func (c *Consumer) Close() error {
 	var (
-		c   *consumer.Consumer
+		err error
+	)
+
+	err = c.consumer.Close()
+	if err != nil {
+		return err
+	}
+
+	return c.UnmarshalConsumer.Close()
+}
+
+func New(q queues.Queue, t interface{}, f formats.Format, l logger.Logger) (*Consumer, error) {
+	var (
+		c   consumer.Consumer
+		uc  *queues.UnmarshalConsumer
 		err error
 	)
 
@@ -28,15 +47,24 @@ func New(q queues.Queue, t interface{}, f formats.Format, l logger.Logger) (*con
 		return nil, errors.NewErrNilArgument(l)
 	}
 
-	c, err = consumer.New(t, f, l)
+	c, err = q.Consumer()
 	if err != nil {
 		return nil, err
 	}
 
-	err = q.Consume(c.Handler)
+	uc, err = queues.NewUnmarshalConsumer(
+		t,
+		c,
+		f,
+		l,
+	)
 	if err != nil {
+		c.Close()
 		return nil, err
 	}
 
-	return c, nil
+	return &Consumer{
+		consumer:          c,
+		UnmarshalConsumer: uc,
+	}, nil
 }
