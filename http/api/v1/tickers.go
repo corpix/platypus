@@ -95,13 +95,15 @@ func (t *Tickers) Close() error {
 
 func (t *Tickers) pump() {
 	var (
-		data []byte
-		key  string
-		err  error
+		ticker *market.Ticker
+		data   []byte
+		key    string
+		err    error
 	)
 
 	for m := range t.Consumer.Consume() {
-		key = m.(*market.Ticker).CurrencyPair.String()
+		ticker = m.(*market.Ticker)
+		key = ticker.CurrencyPair.String() + "|" + ticker.Market
 		err = t.Store.Set(key, m)
 		if err != nil {
 			// XXX: If we can't set into store
