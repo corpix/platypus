@@ -3,7 +3,7 @@ market-fetcher-http
 
 [![Build Status](https://travis-ci.org/cryptounicorns/market-fetcher-http.svg?branch=master)](https://travis-ci.org/cryptounicorns/market-fetcher-http)
 
-HTTP interface for data providen by [market-fetcher](https://github.com/corpix/market-fetcher).
+HTTP interface for data providen by [market-fetcher](https://github.com/cryptounicorns/market-fetcher).
 
 ## Development
 
