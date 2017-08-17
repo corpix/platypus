@@ -3,13 +3,27 @@ import:
 - package: github.com/corpix/formats
 - package: github.com/corpix/logger
   subpackages:
-  - logrus
+  - target/logrus
+- package: github.com/corpix/pool
+- package: github.com/corpix/queues
+  subpackages:
+  - consumer
+  - queue/nsq
+- package: github.com/corpix/trade
+  subpackages:
+  - market
 - package: github.com/davecgh/go-spew
-  version: v1.1.0
   subpackages:
   - spew
-- package: github.com/jinzhu/copier
-- package: github.com/sirupsen/logrus
-  version: v1.0.1
+- package: github.com/fatih/structs
+- package: github.com/gobwas/ws
+  subpackages:
+  - wsutil
+- package: github.com/gorilla/mux
+- package: github.com/imdario/mergo
+- package: github.com/orcaman/concurrent-map
 - package: github.com/urfave/cli
-  version: v1.19.1
+testImport:
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert

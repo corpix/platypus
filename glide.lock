@@ -1,19 +1,18 @@
-hash: b73e5fe59aef61fd10b68fc7689966f620811b5b4e07e0f9b3bc5e823b150a62
-updated: 2017-08-08T20:57:46.808483748Z
+hash: 241e914bafdeaa7839faa1396998dfb8d148d389a6229ab21fd79d44c54aa25b
+updated: 2017-08-17T05:02:20.394085993Z
 imports:
 - name: github.com/bitly/go-nsq
-  version: 1336c299dd900d045fb6df51fc02adf26cde5414
+  version: d71fb89c9e0263aaed89645b0b168e11ccf597b1
 - name: github.com/corpix/formats
   version: db532770e3ecf9dfe31ce2f7bf30c1c26f67e417
 - name: github.com/corpix/logger
   version: 143b9234f91396658f50b727c96c064aa9404d96
   subpackages:
-  - logrus
   - target/logrus
 - name: github.com/corpix/pool
   version: 2396288b6b816f5330c0b92798177655e2509d06
 - name: github.com/corpix/queues
-  version: 51419122976242b24d5d35e8074cd5dc1698bb40
+  version: 542ee2f2d3df84f12afbd512f3939a2eda27c289
   subpackages:
   - consumer
   - errors
@@ -23,12 +22,14 @@ imports:
   - queue/kafka
   - queue/nsq
 - name: github.com/corpix/trade
-  version: af7797357d5f5ed2d165b2f0bfce307fc44aeb28
+  version: be34f9a7da47252c822dc4fe9aad222ff853559e
   subpackages:
+  - currencies
   - errors
   - market
+  - markets/market
 - name: github.com/davecgh/go-spew
-  version: 346938d642f2ec3594ed81d874461961cd0faa76
+  version: adab96458c51a58dc1783b3335dcce5461522e75
   subpackages:
   - spew
 - name: github.com/eapache/go-resiliency
@@ -44,12 +45,12 @@ imports:
 - name: github.com/gobwas/httphead
   version: d8ef83dd38eff6fae44a0397340fd8a42ffd6664
 - name: github.com/gobwas/pool
-  version: 3b1125366fbfa86ec9f7bf65def782885c646a01
+  version: bd45add59ac962618ccb007459d004f1cf1a65cd
   subpackages:
   - pbufio
   - pbytes
 - name: github.com/gobwas/ws
-  version: b6cec4e1d2c07b3a5e84604b320e0e5b085cf01b
+  version: e76b8ddad654b65e621175732059786ae714ebbf
   subpackages:
   - wsutil
 - name: github.com/golang/snappy
@@ -60,8 +61,10 @@ imports:
   version: ac112f7d75a0714af1bd86ab17749b31f7809640
 - name: github.com/imdario/mergo
   version: e3000cb3d28c72b837601cac94debd91032d19fe
-- name: github.com/jinzhu/copier
-  version: 8bfca8a02a0ce12119cdc4974143c834ca589257
+- name: github.com/mreiferson/go-snappystream
+  version: 028eae7ab5c4c9e2d1cb4c4ca1e53259bbe7e504
+  subpackages:
+  - snappy-go
 - name: github.com/orcaman/concurrent-map
   version: 2ae17bc4c860c83513ee50feb9746f3e50d7515d
 - name: github.com/pierrec/lz4
@@ -73,23 +76,23 @@ imports:
 - name: github.com/rcrowley/go-metrics
   version: 1f30fe9094a513ce4c700b9a54458bbb0c96996c
 - name: github.com/Shopify/sarama
-  version: 2fd980e23bdcbb8edeb78fc704de0c39a6567ffc
+  version: c01858abb625b73a3af51d0798e4ad42c8147093
 - name: github.com/sirupsen/logrus
   version: 7f976d3a76720c4c27af2ba716b85d2e0a7e38b1
 - name: github.com/urfave/cli
-  version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
+  version: f017f86fccc5a039a98f23311f34fdf78b014f78
 - name: golang.org/x/sys
-  version: 47bdb838cce8879fca08207206a5dfde2f2538bc
+  version: 9f7170bcd8e9f4d3691c06401119c46a769a1e03
   subpackages:
   - unix
 - name: gopkg.in/yaml.v2
-  version: 25c4ec802a7d637f88d584ab26798e94ad14c13b
+  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 testImports:
 - name: github.com/pmezard/go-difflib
-  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 05e8a0eda380579888eb53c394909df027f06991
+  version: 890a5c3458b43e6104ff5da8dfa139d013d77544
   subpackages:
   - assert

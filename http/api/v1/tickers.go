@@ -7,7 +7,7 @@ import (
 	"github.com/corpix/formats"
 	"github.com/corpix/logger"
 	"github.com/corpix/queues"
-	"github.com/corpix/trade/market"
+	"github.com/corpix/trade/markets/market"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
 	"github.com/gorilla/mux"

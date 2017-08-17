@@ -51,4 +51,6 @@ exit status 2
   https://github.com/crossbario/autobahn-testsuite
 * TODO Review API reply models
   I see this service as a general-purpose thing. So API replies should fit this idea.
+* DONE Camelize keys in json API
+  CLOSED: [2017-08-17 Thu 05:04]
 * TODO Docker infrastructure
