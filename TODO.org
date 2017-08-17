@@ -53,4 +53,5 @@ exit status 2
   I see this service as a general-purpose thing. So API replies should fit this idea.
 * DONE Camelize keys in json API
   CLOSED: [2017-08-17 Thu 05:04]
-* TODO Docker infrastructure
+* DONE Docker infrastructure
+  CLOSED: [2017-08-17 Thu 05:10]
