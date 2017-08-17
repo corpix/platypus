@@ -28,12 +28,6 @@ func (c *Consumer) Close() error {
 }
 
 func New(q queues.Queue, t interface{}, f formats.Format, l logger.Logger) (*Consumer, error) {
-	var (
-		c   consumer.Consumer
-		uc  *consumer.UnmarshalConsumer
-		err error
-	)
-
 	if q == nil {
 		return nil, errors.NewErrNilArgument(q)
 	}
@@ -46,6 +40,12 @@ func New(q queues.Queue, t interface{}, f formats.Format, l logger.Logger) (*Con
 	if l == nil {
 		return nil, errors.NewErrNilArgument(l)
 	}
+
+	var (
+		c   consumer.Consumer
+		uc  *consumer.UnmarshalConsumer
+		err error
+	)
 
 	c, err = q.Consumer()
 	if err != nil {
