@@ -55,3 +55,4 @@ exit status 2
   CLOSED: [2017-08-17 Thu 05:04]
 * DONE Docker infrastructure
   CLOSED: [2017-08-17 Thu 05:10]
+* TODO Utilize docker features to build binaries for containers in containers
