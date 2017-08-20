@@ -71,13 +71,50 @@ $ sudo rkt run --interactive corpix.github.io/nsq:1.0.0 \
         --topic=ticker
 ```
 
-#### Running fetcher
+#### Running market-fetcher
 
-Yo will need a fetcher service which will push data into the queue, please see [market-fetcher Preparation section](https://github.com/cryptounicorns/market-fetcher#preparations).
+We need a data producer. It called a [market-fetcher](https://github.com/cryptounicorns/market-fetcher).
 
-### Running fetcher HTTP API
+This is a service which fetches market data and puts it into the message queue our HTTP API will
+be reading from.
 
-> Containers require a `./build/market-fetcher-http`.
+Build a binary release:
+
+``` console
+$ git clone https://github.com/cryptounicorns/market-fetcher
+$ cd market-fetcher
+$ GOOS=linux make
+```
+
+##### Docker
+
+> From the root of `market-fetcher` repository.
+
+``` console
+$ sudo docker-compose build market-fetcher
+```
+
+Now you should have a `cryptounicorns/market-fetcher` container. Start it:
+
+> From the root of `market-fetcher-http` repository.
+
+``` console
+$ sudo docker-compose up market-fetcher
+```
+
+##### Rkt
+
+There is no rkt container for this service at this time.
+
+##### No isolation
+
+> From the root of `market-fetcher` repository.
+
+``` console
+$ go run ./market-fetcher/market-fetcher.go --debug
+```
+
+### Running fetcher HTTP API frontend
 
 Build a binary release:
 

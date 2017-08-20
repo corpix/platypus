@@ -13,7 +13,7 @@
         "Kafka": null
       },
       "Nsq": {
-        "Addr": "127.0.0.1:4150",
+        "Addr": "nsqd:4150",
         "Topic": "ticker",
         "Channel": "market-fetcher-http",
         "ConsumerBufferSize": 0,
@@ -26,7 +26,7 @@
     }
   },
   "HTTP": {
-    "Addr": "127.0.0.1:8080",
+    "Addr": "0.0.0.0:8080",
     "Api": {
       "Consumer": {
         "Format": "json"

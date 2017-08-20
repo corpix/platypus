@@ -34,6 +34,18 @@ services:
     links:
       - "nsqlookupd:nsqlookupd"
 
+  market-fetcher:
+    image: cryptounicorns/market-fetcher
+    volumes:
+      - ./config.market-fetcher.json:/etc/market-fetcher/config.json
+    command: >-
+      /usr/bin/market-fetcher
+      --config /etc/market-fetcher/config.json
+      --debug
+    links:
+      - "nsqlookupd:nsqlookupd"
+      - "nsqd:nsqd"
+
   market-fetcher-http:
     image: cryptounicorns/market-fetcher-http
     build: .
