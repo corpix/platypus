@@ -8,8 +8,8 @@ services:
       --lookupd-tcp-address=nsqlookupd:4160
       --tcp-address=0.0.0.0:4150
     ports:
-      - "4150:4150"
-      - "4151:4151"
+      - "127.0.0.1:4150:4150"
+      - "127.0.0.1:4151:4151"
     links:
       - "nsqlookupd:nsqlookupd"
 
@@ -19,8 +19,8 @@ services:
       /nsqlookupd
       --tcp-address=0.0.0.0:4160
     ports:
-      - "4160:4160"
-      - "4161:4161"
+      - "127.0.0.1:4160:4160"
+      - "127.0.0.1:4161:4161"
 
   nsqadmin:
     image: nsqio/nsq
@@ -29,8 +29,8 @@ services:
       --lookupd-http-address=nsqlookupd:4161
       --http-address=0.0.0.0:4171
     ports:
-      - "4170:4170"
-      - "4171:4171"
+      - "127.0.0.1:4170:4170"
+      - "127.0.0.1:4171:4171"
     links:
       - "nsqlookupd:nsqlookupd"
 
@@ -57,7 +57,7 @@ services:
       --config /etc/market-fetcher-http/config.json
       --debug
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     links:
       - "nsqlookupd:nsqlookupd"
       - "nsqd:nsqd"
