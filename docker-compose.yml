@@ -4,45 +4,35 @@ services:
     image: nsqio/nsq
     command: >-
       /nsqd
-      --broadcast-address=127.0.0.1
-      --lookupd-tcp-address=127.0.0.1:4160
-      --tcp-address=127.0.0.1:4150
-    network_mode: host
+      --broadcast-address=nsqd
+      --lookupd-tcp-address=nsqlookupd:4160
+      --tcp-address=0.0.0.0:4150
+    ports:
+      - "4150:4150"
+      - "4151:4151"
+    links:
+      - "nsqlookupd:nsqlookupd"
+
   nsqlookupd:
     image: nsqio/nsq
     command: >-
       /nsqlookupd
-      --tcp-address=127.0.0.1:4160
-    network_mode: host
+      --tcp-address=0.0.0.0:4160
+    ports:
+      - "4160:4160"
+      - "4161:4161"
+
   nsqadmin:
     image: nsqio/nsq
     command: >-
       /nsqadmin
-      --lookupd-http-address=127.0.0.1:4161
-      --http-address=127.0.0.1:4171
-    network_mode: host
-
-  etcd:
-    image: quay.io/coreos/etcd
-    command: >-
-      /usr/local/bin/etcd
-      --log-output=stderr
-      --debug
-    network_mode: host
-  zetcd:
-    image: quay.io/coreos/zetcd
-    # Entryponts sucks.
-    command: >-
-      --endpoints=127.0.0.1:2379
-      --zkaddr=127.0.0.1:2181
-    network_mode: host
-  kafka:
-    image: wurstmeister/kafka
-    environment:
-      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
-      KAFKA_CREATE_TOPICS: "tickers:1:1"
-      KAFKA_ZOOKEEPER_CONNECT: "127.0.0.1:2181"
-    network_mode: host
+      --lookupd-http-address=nsqlookupd:4161
+      --http-address=0.0.0.0:4171
+    ports:
+      - "4170:4170"
+      - "4171:4171"
+    links:
+      - "nsqlookupd:nsqlookupd"
 
   market-fetcher-http:
     image: cryptounicorns/market-fetcher-http
@@ -54,4 +44,8 @@ services:
       /usr/bin/market-fetcher-http
       --config /etc/market-fetcher-http/config.json
       --debug
-    network_mode: host
+    ports:
+      - "8080:8080"
+    links:
+      - "nsqlookupd:nsqlookupd"
+      - "nsqd:nsqd"

@@ -19,10 +19,12 @@ All development process accompanied by containers. Docker containers used for de
 - [rkt](https://github.com/coreos/rkt)
 - [acbuild](https://github.com/containers/build)
 
-
 ### Preparations
 
 #### For NSQ
+
+> We use NSQ message queue by default but service also support kafka
+> which is not used here because NSQ is quite enough.
 
 ##### Docker
 
@@ -30,7 +32,10 @@ All development process accompanied by containers. Docker containers used for de
 $ sudo docker-compose up nsqd nsqlookupd nsqadmin
 
 # Run a consumer for ticker topic
-$ sudo docker run -it --net=host nsqio/nsq /nsq_tail --nsqd-tcp-address=127.0.0.1:4150 --topic=ticker
+$ sudo docker run -it --net=host nsqio/nsq \
+    /nsq_tail                              \
+    --nsqd-tcp-address=127.0.0.1:4150      \
+    --topic=ticker
 ```
 
 ##### Rkt
@@ -38,51 +43,32 @@ $ sudo docker run -it --net=host nsqio/nsq /nsq_tail --nsqd-tcp-address=127.0.0.
 > All commands should be run in separate terminal windows.
 
 ``` console
-$ sudo rkt run --interactive corpix.github.io/nsq:1.0.0 --net=host -- nsqd --broadcast-address=127.0.0.1 --lookupd-tcp-address=127.0.0.1:4160 --tcp-address=127.0.0.1:4150
-$ sudo rkt run --interactive corpix.github.io/nsq:1.0.0 --net=host -- nsqlookupd --tcp-address=127.0.0.1:4160
+$ sudo rkt run --interactive corpix.github.io/nsq:1.0.0 \
+    --net=host                                          \
+    -- nsqd                                             \
+        --broadcast-address=127.0.0.1                   \
+        --lookupd-tcp-address=127.0.0.1:4160            \
+        --tcp-address=127.0.0.1:4150
 
-# Optionally you could run nsqadmin which will provide you a WEBUI for nsq topics etc.
-$ sudo rkt run --interactive corpix.github.io/nsq:1.0.0 --net=host -- nsqadmin --lookupd-http-address=127.0.0.1:4161 --http-address=127.0.0.1:4171
+$ sudo rkt run --interactive corpix.github.io/nsq:1.0.0 \
+    --net=host                                          \
+    -- nsqlookupd                                       \
+        --tcp-address=127.0.0.1:4160
 
-# Run a consumer for ticker topic
-$ sudo rkt run --net=host --interactive corpix.github.io/nsq:1.0.0 -- nsq_tail --nsqd-tcp-address=127.0.0.1:4150 --topic=ticker
-
-```
-
-#### For Kafka
-
-##### Docker
-
-``` console
-$ sudo docker-compose up etcd zetcd kafka
-
-# Run a consumer for ticker topic
-$ sudo docker run -it docker.io/wurstmeister/kafka /opt/kafka/bin/kafka-console-consumer.sh -- --from-beginning --zookeeper=127.0.0.1:2181 --topic=ticker
-```
-
-##### Rkt
-
-> All commands should be run in separate terminal windows.
-
-``` console
-$ sudo rkt run --interactive coreos.com/etcd:v3.1.8 --net=host -- --log-output=stderr --debug
-$ sudo rkt run --interactive corpix.github.io/zetcd:0.0.2 --net=host -- --zkaddr=127.0.0.1:2181 --endpoints=127.0.0.1:2379 --logtostderr
-
-# Init zetcd with data(or kafka will fail to start)
-$ sudo rkt run                                 \
-    --interactive corpix.github.io/zetcd:0.0.2 \
-    --net=host --exec=/bin/bash                \
-    -- -c "
-        zkctl create '/' ''
-        zkctl create '/brokers' ''
-        zkctl create '/brokers/ids' ''
-        zkctl create '/brokers/topics' ''
-    "
-
-$ sudo rkt run --interactive corpix.github.io/kafka:2.12-0.10.2.1-1496226351 --net=host
+# Optionally you could run nsqadmin which will provide
+# you a WEBUI for nsq topics etc.
+$ sudo rkt run --interactive corpix.github.io/nsq:1.0.0 \
+    --net=host                                          \
+    -- nsqadmin                                         \
+        --lookupd-http-address=127.0.0.1:4161           \
+        --http-address=127.0.0.1:4171
 
 # Run a consumer for ticker topic
-$ sudo rkt run --interactive corpix.github.io/kafka:2.12-0.10.2.1-1496226351 --net=host --exec=/usr/bin/kafka-console-consumer -- --from-beginning --zookeeper=127.0.0.1:2181 --topic=ticker
+$ sudo rkt run --interactive corpix.github.io/nsq:1.0.0 \
+    --net=host                                          \
+    -- nsq_tail                                         \
+        --nsqd-tcp-address=127.0.0.1:4150               \
+        --topic=ticker
 ```
 
 #### Running fetcher
@@ -90,6 +76,15 @@ $ sudo rkt run --interactive corpix.github.io/kafka:2.12-0.10.2.1-1496226351 --n
 Yo will need a fetcher service which will push data into the queue, please see [market-fetcher Preparation section](https://github.com/cryptounicorns/market-fetcher#preparations).
 
 ### Running fetcher HTTP API
+
+> Containers require a `./build/market-fetcher-http`.
+
+Build a binary release:
+
+``` console
+$ GOOS=linux make
+# This will put a binary into ./build/market-fetcher-http
+```
 
 #### Docker
 
