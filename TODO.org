@@ -56,3 +56,9 @@ exit status 2
 * DONE Docker infrastructure
   CLOSED: [2017-08-17 Thu 05:10]
 * TODO Utilize docker features to build binaries for containers in containers
+* TODO Add some swag to HTTP API
+  [[http://owned.com/media/_cache/adjusted/postblock/image/4/3/4/_/434.jpg.png]]
+  https://github.com/savaki/swag
+* TODO Transform the whole service into bridge between MQ and websocket clients
+  It should be data-agnostic.
+  All endpoints and formats(for serialization) should come from config.
