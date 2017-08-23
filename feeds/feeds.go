@@ -1,7 +1,7 @@
 package feeds
 
 import (
-	"github.com/corpix/logger"
+	"github.com/corpix/loggers"
 	"github.com/corpix/queues"
 )
 
@@ -22,7 +22,7 @@ func (fs *Feeds) Close() error {
 	return nil
 }
 
-func New(c Config, l logger.Logger) (*Feeds, error) {
+func New(c Config, l loggers.Logger) (*Feeds, error) {
 	var (
 		tickers queues.Queue
 		err     error

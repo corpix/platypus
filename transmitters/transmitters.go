@@ -3,7 +3,7 @@ package transmitters
 import (
 	"strings"
 
-	"github.com/corpix/logger"
+	"github.com/corpix/loggers"
 	"github.com/fatih/structs"
 
 	"github.com/cryptounicorns/market-fetcher-http/errors"
@@ -16,7 +16,7 @@ const (
 	BroadcastTransmitterType = "broadcast"
 )
 
-func New(c Config, ws writers.Writers, w writers.Writer, e transmitter.ErrorHandler, l logger.Logger) (Transmitter, error) {
+func New(c Config, ws writers.Writers, w writers.Writer, e transmitter.ErrorHandler, l loggers.Logger) (Transmitter, error) {
 	var (
 		t = strings.ToLower(c.Type)
 	)

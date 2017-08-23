@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"github.com/corpix/logger"
+	"github.com/corpix/loggers"
 	cmap "github.com/orcaman/concurrent-map"
 
 	"github.com/cryptounicorns/market-fetcher-http/errors"
@@ -9,7 +9,7 @@ import (
 
 type Memory struct {
 	storage cmap.ConcurrentMap
-	log     logger.Logger
+	log     loggers.Logger
 
 	Config
 }
@@ -42,7 +42,7 @@ func (s Memory) Iter(fn func(key string, value interface{})) error {
 
 //
 
-func New(c Config, l logger.Logger) (*Memory, error) {
+func New(c Config, l loggers.Logger) (*Memory, error) {
 	if l == nil {
 		return nil, errors.NewErrNilArgument(l)
 	}

@@ -4,13 +4,13 @@ import (
 	"io"
 	"net"
 
-	"github.com/corpix/logger"
+	"github.com/corpix/loggers"
 
 	"github.com/cryptounicorns/market-fetcher-http/transmitters/transmitter"
 	"github.com/cryptounicorns/market-fetcher-http/writerpool"
 )
 
-func WriterPoolCleanerErrorHandler(ws *writerpool.WriterPool, l logger.Logger) transmitter.ErrorHandler {
+func WriterPoolCleanerErrorHandler(ws *writerpool.WriterPool, l loggers.Logger) transmitter.ErrorHandler {
 	return func(w io.Writer, err error) {
 		var (
 			closer io.Closer

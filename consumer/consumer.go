@@ -2,7 +2,7 @@ package consumer
 
 import (
 	"github.com/corpix/formats"
-	"github.com/corpix/logger"
+	"github.com/corpix/loggers"
 	"github.com/corpix/queues"
 	"github.com/corpix/queues/consumer"
 
@@ -27,7 +27,7 @@ func (c *Consumer) Close() error {
 	return c.UnmarshalConsumer.Close()
 }
 
-func New(q queues.Queue, t interface{}, f formats.Format, l logger.Logger) (*Consumer, error) {
+func New(q queues.Queue, t interface{}, f formats.Format, l loggers.Logger) (*Consumer, error) {
 	if q == nil {
 		return nil, errors.NewErrNilArgument(q)
 	}

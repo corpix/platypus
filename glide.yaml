@@ -1,7 +1,7 @@
 package: github.com/cryptounicorns/market-fetcher-http
 import:
 - package: github.com/corpix/formats
-- package: github.com/corpix/logger
+- package: github.com/corpix/loggers
   subpackages:
   - target/logrus
 - package: github.com/corpix/pool

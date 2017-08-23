@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/corpix/formats"
-	"github.com/corpix/logger"
+	"github.com/corpix/loggers"
 	"github.com/corpix/queues"
 	"github.com/corpix/trade/markets/market"
 	"github.com/gobwas/ws"
@@ -28,7 +28,7 @@ type Tickers struct {
 	Format      formats.Format
 	Transmitter transmitters.Transmitter
 	WriterPool  *writerpool.WriterPool
-	log         logger.Logger
+	log         loggers.Logger
 }
 
 func (t *Tickers) Handle(rw http.ResponseWriter, r *http.Request) {
@@ -129,7 +129,7 @@ func MountTickers(r *mux.Router, t *Tickers) {
 	r.HandleFunc("/stream", t.Handle)
 }
 
-func NewTickers(c config.Config, r *mux.Router, q queues.Queue, l logger.Logger) (*Tickers, error) {
+func NewTickers(c config.Config, r *mux.Router, q queues.Queue, l loggers.Logger) (*Tickers, error) {
 	if r == nil {
 		return nil, errors.NewErrNilArgument(r)
 	}

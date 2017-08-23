@@ -3,7 +3,7 @@ package stores
 import (
 	"strings"
 
-	"github.com/corpix/logger"
+	"github.com/corpix/loggers"
 	"github.com/fatih/structs"
 
 	"github.com/cryptounicorns/market-fetcher-http/errors"
@@ -14,7 +14,7 @@ const (
 	MemoryStoreType = "memory"
 )
 
-func New(c Config, l logger.Logger) (Store, error) {
+func New(c Config, l loggers.Logger) (Store, error) {
 	var (
 		t = strings.ToLower(c.Type)
 	)

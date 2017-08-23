@@ -1,18 +1,20 @@
-hash: 241e914bafdeaa7839faa1396998dfb8d148d389a6229ab21fd79d44c54aa25b
-updated: 2017-08-17T05:02:20.394085993Z
+hash: baee863f7790d16c0d21de21c34a1637bc7c30f0850dd1f6863b7ff2a53524c3
+updated: 2017-08-24T22:52:19.187496594Z
 imports:
 - name: github.com/bitly/go-nsq
   version: d71fb89c9e0263aaed89645b0b168e11ccf597b1
 - name: github.com/corpix/formats
   version: db532770e3ecf9dfe31ce2f7bf30c1c26f67e417
-- name: github.com/corpix/logger
-  version: 143b9234f91396658f50b727c96c064aa9404d96
+- name: github.com/corpix/loggers
+  version: ca89089924c60b88d088de6337f812c04b55db83
   subpackages:
+  - logger/logrus
+  - logger/prefixwrapper
   - target/logrus
 - name: github.com/corpix/pool
   version: 2396288b6b816f5330c0b92798177655e2509d06
 - name: github.com/corpix/queues
-  version: 542ee2f2d3df84f12afbd512f3939a2eda27c289
+  version: 108d9f1bcd92cb6cacde0336f0f895d937a93427
   subpackages:
   - consumer
   - errors

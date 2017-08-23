@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"github.com/corpix/logger"
+	"github.com/corpix/loggers"
 	"github.com/gorilla/mux"
 
 	"github.com/cryptounicorns/market-fetcher-http/errors"
@@ -27,7 +27,7 @@ func (a *V1) Close() error {
 	return nil
 }
 
-func New(c config.Config, r *mux.Router, f *feeds.Feeds, l logger.Logger) (*V1, error) {
+func New(c config.Config, r *mux.Router, f *feeds.Feeds, l loggers.Logger) (*V1, error) {
 	if r == nil {
 		return nil, errors.NewErrNilArgument(r)
 	}

@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 
-	"github.com/corpix/logger"
+	"github.com/corpix/loggers"
 	"github.com/gorilla/mux"
 
 	"github.com/cryptounicorns/market-fetcher-http/errors"
@@ -14,7 +14,7 @@ import (
 type Server struct {
 	Config
 	Feeds *feeds.Feeds
-	log   logger.Logger
+	log   loggers.Logger
 }
 
 func (s *Server) Serve() error {
@@ -40,7 +40,7 @@ func (s *Server) Serve() error {
 	)
 }
 
-func New(c Config, f *feeds.Feeds, l logger.Logger) (*Server, error) {
+func New(c Config, f *feeds.Feeds, l loggers.Logger) (*Server, error) {
 	if f == nil {
 		return nil, errors.NewErrNilArgument(f)
 	}

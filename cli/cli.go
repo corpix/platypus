@@ -5,7 +5,7 @@ import (
 	builtinLogger "log"
 	"os"
 
-	"github.com/corpix/logger"
+	"github.com/corpix/loggers"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/urfave/cli"
 
@@ -17,7 +17,7 @@ var (
 	version = "development"
 
 	// log is a application-wide logger.
-	log logger.Logger
+	log loggers.Logger
 
 	// Config is a container that represents the current application configuration.
 	Config = &config.Config{}

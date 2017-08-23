@@ -5,7 +5,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/corpix/logger"
+	"github.com/corpix/loggers"
 	"github.com/corpix/pool"
 
 	"github.com/cryptounicorns/market-fetcher-http/errors"
@@ -14,7 +14,7 @@ import (
 )
 
 type Broadcast struct {
-	log          logger.Logger
+	log          loggers.Logger
 	ErrorHandler transmitter.ErrorHandler
 
 	*pool.Pool
@@ -72,7 +72,7 @@ func (b *Broadcast) Close() error {
 	return nil
 }
 
-func New(c Config, ws writers.Writers, w writers.Writer, e transmitter.ErrorHandler, l logger.Logger) (*Broadcast, error) {
+func New(c Config, ws writers.Writers, w writers.Writer, e transmitter.ErrorHandler, l loggers.Logger) (*Broadcast, error) {
 	if ws == nil {
 		return nil, errors.NewErrNilArgument(ws)
 	}
