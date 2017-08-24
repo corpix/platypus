@@ -43,11 +43,11 @@ imports:
 - name: github.com/eapache/queue
   version: 44cc805cf13205b55f69e14bcb69867d1ae92f98
 - name: github.com/fatih/structs
-  version: 7e5a8eef611ee84dd359503f3969f80df4c50723
+  version: a720dfa8df582c51dee1b36feabb906bde1588bd
 - name: github.com/gobwas/httphead
   version: d8ef83dd38eff6fae44a0397340fd8a42ffd6664
 - name: github.com/gobwas/pool
-  version: bd45add59ac962618ccb007459d004f1cf1a65cd
+  version: bb869d364794b4730d7d8fbc4fece0a500733af8
   subpackages:
   - pbufio
   - pbytes
@@ -84,7 +84,7 @@ imports:
 - name: github.com/urfave/cli
   version: f017f86fccc5a039a98f23311f34fdf78b014f78
 - name: golang.org/x/sys
-  version: 9f7170bcd8e9f4d3691c06401119c46a769a1e03
+  version: 07c182904dbd53199946ba614a412c61d3c548f5
   subpackages:
   - unix
 - name: gopkg.in/yaml.v2
