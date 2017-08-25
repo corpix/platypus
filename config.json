@@ -3,7 +3,7 @@
     "Level": "info",
     "Formatter": "json"
   },
-  "Feed": {
+  "Feeds": {
     "Tickers": {
       "Type": "nsq",
       "Kafka": {

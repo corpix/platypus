@@ -37,7 +37,7 @@ func RootAction(c *cli.Context) error {
 	)
 
 	f, err = feeds.New(
-		Config.Feed,
+		Config.Feeds,
 		log,
 	)
 	if err != nil {

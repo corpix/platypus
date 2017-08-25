@@ -30,7 +30,7 @@ var (
 	}
 
 	// FeedConfig represents default data sources config.
-	FeedConfig = feeds.Config{
+	FeedsConfig = feeds.Config{
 		Tickers: queues.Config{
 			Type: queues.NsqQueueType,
 			Nsq: nsq.Config{
@@ -69,7 +69,7 @@ var (
 	// Default represents default application config.
 	Default = Config{
 		Logger: LoggerConfig,
-		Feed:   FeedConfig,
+		Feeds:  FeedsConfig,
 		HTTP:   HTTPConfig,
 	}
 )
@@ -77,7 +77,7 @@ var (
 // Config represents application configuration structure.
 type Config struct {
 	Logger logger.Config
-	Feed   feeds.Config
+	Feeds  feeds.Config
 	HTTP   http.Config
 }
 
