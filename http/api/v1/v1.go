@@ -27,7 +27,7 @@ func (a *V1) Close() error {
 	return nil
 }
 
-func New(c config.Config, r *mux.Router, f *feeds.Feeds, l loggers.Logger) (*V1, error) {
+func New(c config.Config, r *mux.Router, f feeds.Feeds, l loggers.Logger) (*V1, error) {
 	if r == nil {
 		return nil, errors.NewErrNilArgument(r)
 	}
@@ -47,7 +47,7 @@ func New(c config.Config, r *mux.Router, f *feeds.Feeds, l loggers.Logger) (*V1,
 	tickers, err = NewTickers(
 		c,
 		v1,
-		f.Tickers,
+		f["tickers"],
 		l,
 	)
 	if err != nil {

@@ -4,7 +4,7 @@
     "Formatter": "json"
   },
   "Feeds": {
-    "Tickers": {
+    "tickers": {
       "Type": "nsq",
       "Kafka": {
         "Addrs": null,

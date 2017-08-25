@@ -5,38 +5,38 @@ import (
 	"github.com/corpix/queues"
 )
 
-type Feeds struct {
-	Tickers queues.Queue
-}
+type Feeds map[string]queues.Queue
 
-func (fs *Feeds) Close() error {
+func (fs Feeds) Close() error {
 	var (
 		err error
 	)
 
-	err = fs.Tickers.Close()
-	if err != nil {
-		return err
+	for _, v := range fs {
+		err = v.Close()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func New(c Config, l loggers.Logger) (*Feeds, error) {
+func New(c Config, l loggers.Logger) (Feeds, error) {
 	var (
-		tickers queues.Queue
-		err     error
+		qs  = Feeds{}
+		q   queues.Queue
+		err error
 	)
 
-	tickers, err = queues.NewFromConfig(
-		c.Tickers,
-		l,
-	)
-	if err != nil {
-		return nil, err
+	for k, v := range c {
+		q, err = queues.NewFromConfig(v, l)
+		if err != nil {
+			return nil, err
+		}
+
+		qs[k] = q
 	}
 
-	return &Feeds{
-		Tickers: tickers,
-	}, nil
+	return qs, nil
 }

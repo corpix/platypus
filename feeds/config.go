@@ -4,6 +4,4 @@ import (
 	"github.com/corpix/queues"
 )
 
-type Config struct {
-	Tickers queues.Config
-}
+type Config map[string]queues.Config

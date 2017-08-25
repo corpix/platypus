@@ -31,7 +31,7 @@ var (
 
 	// FeedConfig represents default data sources config.
 	FeedsConfig = feeds.Config{
-		Tickers: queues.Config{
+		"tickers": queues.Config{
 			Type: queues.NsqQueueType,
 			Nsq: nsq.Config{
 				Addr:     "127.0.0.1:4150",

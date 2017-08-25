@@ -13,7 +13,7 @@ import (
 
 type Server struct {
 	Config
-	Feeds *feeds.Feeds
+	Feeds feeds.Feeds
 	log   loggers.Logger
 }
 
@@ -40,7 +40,7 @@ func (s *Server) Serve() error {
 	)
 }
 
-func New(c Config, f *feeds.Feeds, l loggers.Logger) (*Server, error) {
+func New(c Config, f feeds.Feeds, l loggers.Logger) (*Server, error) {
 	if f == nil {
 		return nil, errors.NewErrNilArgument(f)
 	}

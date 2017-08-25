@@ -19,7 +19,7 @@ func (a *Api) Close() error {
 	return a.V1.Close()
 }
 
-func New(c config.Config, r *mux.Router, f *feeds.Feeds, l loggers.Logger) (*Api, error) {
+func New(c config.Config, r *mux.Router, f feeds.Feeds, l loggers.Logger) (*Api, error) {
 	if r == nil {
 		return nil, errors.NewErrNilArgument(r)
 	}

@@ -31,7 +31,7 @@ var (
 // RootAction is executing when program called without any subcommand.
 func RootAction(c *cli.Context) error {
 	var (
-		f   *feeds.Feeds
+		f   feeds.Feeds
 		s   *http.Server
 		err error
 	)

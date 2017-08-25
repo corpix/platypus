@@ -64,3 +64,8 @@ exit status 2
 * TODO Transform the whole service into bridge between MQ and websocket clients
   It should be data-agnostic.
   All endpoints and formats(for serialization) should come from config.
+** DONE Create feeds from config
+   CLOSED: [2017-08-25 Fri 20:47]
+  This requires a Feeds struct to be converted into map[string]*Feed
+** TODO Create http endpoints from config
+   Concrete constructors such as api.v1.NewTickers should be eliminated
