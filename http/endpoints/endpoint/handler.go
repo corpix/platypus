@@ -1,4 +1,4 @@
-package v1
+package endpoint
 
 import (
 	"io"
@@ -7,22 +7,18 @@ import (
 	"github.com/corpix/formats"
 	"github.com/corpix/loggers"
 	"github.com/corpix/queues"
-	"github.com/corpix/trade/markets/market"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
-	"github.com/gorilla/mux"
 
 	"github.com/cryptounicorns/market-fetcher-http/consumer"
 	"github.com/cryptounicorns/market-fetcher-http/errors"
-	"github.com/cryptounicorns/market-fetcher-http/http/api/config"
-	apiTransmitter "github.com/cryptounicorns/market-fetcher-http/http/api/transmitter"
+	endpointsTransmitter "github.com/cryptounicorns/market-fetcher-http/http/endpoints/transmitter"
 	"github.com/cryptounicorns/market-fetcher-http/stores"
 	"github.com/cryptounicorns/market-fetcher-http/transmitters"
 	"github.com/cryptounicorns/market-fetcher-http/writerpool"
 )
 
-type Tickers struct {
-	Router      *mux.Router
+type Handler struct {
 	Consumer    *consumer.Consumer
 	Store       stores.Store
 	Format      formats.Format
@@ -31,7 +27,7 @@ type Tickers struct {
 	log         loggers.Logger
 }
 
-func (t *Tickers) Handle(rw http.ResponseWriter, r *http.Request) {
+func (h *Handler) Handle(rw http.ResponseWriter, r *http.Request) {
 	var (
 		conn io.WriteCloser
 		err  error
@@ -39,20 +35,20 @@ func (t *Tickers) Handle(rw http.ResponseWriter, r *http.Request) {
 
 	conn, _, _, err = ws.UpgradeHTTP(r, rw, nil)
 	if err != nil {
-		t.log.Error(err)
+		h.log.Error(err)
 		return
 	}
 
-	err = t.Store.Iter(
+	err = h.Store.Iter(
 		func(k string, v interface{}) {
 			var (
 				data []byte
 				err  error
 			)
 
-			data, err = t.Format.Marshal(v)
+			data, err = h.Format.Marshal(v)
 			if err != nil {
-				t.log.Error(err)
+				h.log.Error(err)
 				return
 			}
 
@@ -61,31 +57,31 @@ func (t *Tickers) Handle(rw http.ResponseWriter, r *http.Request) {
 				data,
 			)
 			if err != nil {
-				t.log.Error(err)
+				h.log.Error(err)
 				return
 			}
 		},
 	)
 	if err != nil {
-		t.log.Error(err)
+		h.log.Error(err)
 		conn.Close()
 		return
 	}
 
-	t.WriterPool.Add(conn)
+	h.WriterPool.Add(conn)
 }
 
-func (t *Tickers) Close() error {
+func (h *Handler) Close() error {
 	var (
 		err error
 	)
 
-	err = t.Consumer.Close()
+	err = h.Consumer.Close()
 	if err != nil {
 		return err
 	}
 
-	err = t.Transmitter.Close()
+	err = h.Transmitter.Close()
 	if err != nil {
 		return err
 	}
@@ -93,46 +89,40 @@ func (t *Tickers) Close() error {
 	return nil
 }
 
-func (t *Tickers) pump() {
+func (h *Handler) pump() {
 	var (
-		ticker *market.Ticker
-		data   []byte
-		key    string
-		err    error
+		// ticker *market.Ticker
+		data []byte
+		// key    string
+		err error
 	)
 
-	for m := range t.Consumer.Consume() {
-		ticker = m.(*market.Ticker)
-		key = ticker.CurrencyPair.String() + "|" + ticker.Market
-		err = t.Store.Set(key, m)
-		if err != nil {
-			// XXX: If we can't set into store
-			// then it is not critical, just log and go on.
-			t.log.Error(err)
-		}
+	for m := range h.Consumer.Consume() {
+		// FIXME: Use some sort of ring buffer for messages
+		// ticker = m.(*market.Ticker)
+		// key = ticker.CurrencyPair.String() + "|" + ticker.Market
+		// err = t.Store.Set(key, m)
+		// if err != nil {
+		// 	// XXX: If we can't set into store
+		// 	// then it is not critical, just log and go on.
+		// 	t.log.Error(err)
+		// }
 
-		data, err = t.Format.Marshal(m)
+		data, err = h.Format.Marshal(m)
 		if err != nil {
-			t.log.Error(err)
+			h.log.Error(err)
 			continue
 		}
 
-		_, err = t.Transmitter.Write(data)
+		_, err = h.Transmitter.Write(data)
 		if err != nil {
-			t.log.Error(err)
+			h.log.Error(err)
 			continue
 		}
 	}
 }
 
-func MountTickers(r *mux.Router, t *Tickers) {
-	r.HandleFunc("/stream", t.Handle)
-}
-
-func NewTickers(c config.Config, r *mux.Router, q queues.Queue, l loggers.Logger) (*Tickers, error) {
-	if r == nil {
-		return nil, errors.NewErrNilArgument(r)
-	}
+func NewHandler(c Config, q queues.Queue, l loggers.Logger) (*Handler, error) {
 	if q == nil {
 		return nil, errors.NewErrNilArgument(q)
 	}
@@ -146,6 +136,7 @@ func NewTickers(c config.Config, r *mux.Router, q queues.Queue, l loggers.Logger
 		cr  *consumer.Consumer
 		s   stores.Store
 		t   transmitters.Transmitter
+		h   *Handler
 		err error
 	)
 
@@ -166,7 +157,7 @@ func NewTickers(c config.Config, r *mux.Router, q queues.Queue, l loggers.Logger
 		c.Transmitter,
 		ws,
 		wsutil.WriteServerText,
-		apiTransmitter.WriterPoolCleanerErrorHandler(ws, l),
+		endpointsTransmitter.WriterPoolCleanerErrorHandler(ws, l),
 		l,
 	)
 	if err != nil {
@@ -175,7 +166,7 @@ func NewTickers(c config.Config, r *mux.Router, q queues.Queue, l loggers.Logger
 
 	cr, err = consumer.New(
 		q,
-		market.Ticker{},
+		new(interface{}),
 		f,
 		l,
 	)
@@ -183,8 +174,7 @@ func NewTickers(c config.Config, r *mux.Router, q queues.Queue, l loggers.Logger
 		return nil, err
 	}
 
-	tickers := &Tickers{
-		Router:      r.PathPrefix("/tickers").Subrouter(),
+	h = &Handler{
 		Consumer:    cr,
 		Store:       s,
 		Format:      formats.NewJSON(),
@@ -193,12 +183,7 @@ func NewTickers(c config.Config, r *mux.Router, q queues.Queue, l loggers.Logger
 		log:         l,
 	}
 
-	MountTickers(
-		tickers.Router,
-		tickers,
-	)
+	go h.pump()
 
-	go tickers.pump()
-
-	return tickers, nil
+	return h, nil
 }

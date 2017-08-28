@@ -7,14 +7,14 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/cryptounicorns/market-fetcher-http/errors"
-	"github.com/cryptounicorns/market-fetcher-http/feeds"
-	"github.com/cryptounicorns/market-fetcher-http/http/api"
+	"github.com/cryptounicorns/market-fetcher-http/http/endpoints"
 )
 
 type Server struct {
 	Config
-	Feeds feeds.Feeds
-	log   loggers.Logger
+	endpoints endpoints.Endpoints
+	router    *mux.Router
+	log       loggers.Logger
 }
 
 func (s *Server) Serve() error {
@@ -22,35 +22,41 @@ func (s *Server) Serve() error {
 		"Starting server on '%s'...",
 		s.Config.Addr,
 	)
-	r := mux.NewRouter()
-
-	_, err := api.New(
-		s.Config.Api,
-		r,
-		s.Feeds,
-		s.log,
-	)
-	if err != nil {
-		return err
-	}
 
 	return http.ListenAndServe(
 		s.Config.Addr,
-		r,
+		s.router,
 	)
 }
 
-func New(c Config, f feeds.Feeds, l loggers.Logger) (*Server, error) {
-	if f == nil {
-		return nil, errors.NewErrNilArgument(f)
-	}
+func (s *Server) Close() error {
+	return s.endpoints.Close()
+}
+
+func New(c Config, l loggers.Logger) (*Server, error) {
 	if l == nil {
 		return nil, errors.NewErrNilArgument(l)
 	}
 
+	var (
+		r   = mux.NewRouter()
+		es  endpoints.Endpoints
+		err error
+	)
+
+	es, err = endpoints.New(
+		c.Endpoints,
+		r,
+		l,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Server{
-		Config: c,
-		Feeds:  f,
-		log:    l,
+		Config:    c,
+		endpoints: es,
+		router:    r,
+		log:       l,
 	}, nil
 }

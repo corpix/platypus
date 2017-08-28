@@ -13,9 +13,8 @@ import (
 	"github.com/imdario/mergo"
 
 	"github.com/cryptounicorns/market-fetcher-http/consumer"
-	"github.com/cryptounicorns/market-fetcher-http/feeds"
 	"github.com/cryptounicorns/market-fetcher-http/http"
-	api "github.com/cryptounicorns/market-fetcher-http/http/api/config"
+	"github.com/cryptounicorns/market-fetcher-http/http/endpoints"
 	"github.com/cryptounicorns/market-fetcher-http/logger"
 	"github.com/cryptounicorns/market-fetcher-http/stores"
 	"github.com/cryptounicorns/market-fetcher-http/stores/store/memory"
@@ -29,37 +28,38 @@ var (
 		Level: "info",
 	}
 
-	// FeedConfig represents default data sources config.
-	FeedsConfig = feeds.Config{
-		"tickers": queues.Config{
-			Type: queues.NsqQueueType,
-			Nsq: nsq.Config{
-				Addr:     "127.0.0.1:4150",
-				Topic:    "ticker",
-				Channel:  "market-fetcher-http",
-				LogLevel: nsq.LogLevelInfo,
-			},
-		},
-	}
-
 	// HTTPConfig represents default http server config.
 	HTTPConfig = http.Config{
 		Addr: ":8080",
-		Api: api.Config{
-			Consumer: consumer.Config{
-				Format: "json",
-			},
-			Store: stores.Config{
-				Type:   stores.MemoryStoreType,
-				Memory: memory.Config{},
-			},
-			Transmitter: transmitters.Config{
-				Type: transmitters.BroadcastTransmitterType,
-				Broadcast: broadcast.Config{
-					WriteTimeout: 10 * time.Second,
-					Pool: pool.Config{
-						Workers:   128,
-						QueueSize: 1024,
+		Endpoints: endpoints.Config{
+			{
+				Path:   "/api/v1/tickers/stream",
+				Method: "get",
+
+				Queue: queues.Config{
+					Type: queues.NsqQueueType,
+					Nsq: nsq.Config{
+						Addr:     "127.0.0.1:4150",
+						Topic:    "ticker",
+						Channel:  "market-fetcher-http",
+						LogLevel: nsq.LogLevelInfo,
+					},
+				},
+				Consumer: consumer.Config{
+					Format: "json",
+				},
+				Store: stores.Config{
+					Type:   stores.MemoryStoreType,
+					Memory: memory.Config{},
+				},
+				Transmitter: transmitters.Config{
+					Type: transmitters.BroadcastTransmitterType,
+					Broadcast: broadcast.Config{
+						WriteTimeout: 10 * time.Second,
+						Pool: pool.Config{
+							Workers:   128,
+							QueueSize: 1024,
+						},
 					},
 				},
 			},
@@ -69,7 +69,6 @@ var (
 	// Default represents default application config.
 	Default = Config{
 		Logger: LoggerConfig,
-		Feeds:  FeedsConfig,
 		HTTP:   HTTPConfig,
 	}
 )
@@ -77,7 +76,6 @@ var (
 // Config represents application configuration structure.
 type Config struct {
 	Logger logger.Config
-	Feeds  feeds.Config
 	HTTP   http.Config
 }
 

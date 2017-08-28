@@ -67,5 +67,12 @@ exit status 2
 ** DONE Create feeds from config
    CLOSED: [2017-08-25 Fri 20:47]
   This requires a Feeds struct to be converted into map[string]*Feed
-** TODO Create http endpoints from config
+** DONE Create http endpoints from config
+   CLOSED: [2017-08-28 Mon 18:55]
    Concrete constructors such as api.v1.NewTickers should be eliminated
+   This is the point where we should become data-agnostic.
+** TODO Replace key-based memory store
+   Store which requires a key constructed from knowledge of the data structure can't
+   be used in data-agnostic environment.
+   There could be a ring buffer or a buffer with expire time.
+   Currently store is not used(we does not set, but we read)

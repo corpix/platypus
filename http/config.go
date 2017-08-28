@@ -1,10 +1,10 @@
 package http
 
 import (
-	api "github.com/cryptounicorns/market-fetcher-http/http/api/config"
+	"github.com/cryptounicorns/market-fetcher-http/http/endpoints"
 )
 
 type Config struct {
-	Addr string
-	Api  api.Config
+	Addr      string
+	Endpoints endpoints.Config
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/cryptounicorns/market-fetcher-http/feeds"
 	"github.com/cryptounicorns/market-fetcher-http/http"
 )
 
@@ -31,23 +30,12 @@ var (
 // RootAction is executing when program called without any subcommand.
 func RootAction(c *cli.Context) error {
 	var (
-		f   feeds.Feeds
 		s   *http.Server
 		err error
 	)
 
-	f, err = feeds.New(
-		Config.Feeds,
-		log,
-	)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
 	s, err = http.New(
 		Config.HTTP,
-		f,
 		log,
 	)
 	if err != nil {

@@ -1,50 +1,52 @@
 {
-  "Logger": {
-    "Level": "info",
-    "Formatter": "json"
-  },
-  "Feeds": {
-    "tickers": {
-      "Type": "nsq",
-      "Kafka": {
-        "Addrs": null,
-        "Topic": "",
-        "ConsumerBufferSize": 0,
-        "Kafka": null
-      },
-      "Nsq": {
-        "Addr": "nsqd:4150",
-        "Topic": "ticker",
-        "Channel": "market-fetcher-http",
-        "ConsumerBufferSize": 0,
-        "LogLevel": 1,
-        "Nsq": null
-      },
-      "Channel": {
-        "Capacity": 0
-      }
+    "Logger": {
+        "Level": "debug",
+        "Formatter": ""
+    },
+    "HTTP": {
+        "Addr": ":8080",
+        "Endpoints": [
+            {
+                "Path": "/api/v1/tickers/stream",
+                "Method": "get",
+                "Queue": {
+                    "Type": "nsq",
+                    "Kafka": {
+                        "Addrs": null,
+                        "Topic": "",
+                        "ConsumerBufferSize": 0,
+                        "Kafka": null
+                    },
+                    "Nsq": {
+                        "Addr": "127.0.0.1:4150",
+                        "Topic": "ticker",
+                        "Channel": "market-fetcher-http",
+                        "ConsumerBufferSize": 0,
+                        "LogLevel": 1,
+                        "Nsq": null
+                    },
+                    "Channel": {
+                        "Capacity": 0
+                    }
+                },
+                "Consumer": {
+                    "Format": "json"
+                },
+                "Store": {
+                    "Type": "memory",
+                    "Memory": {}
+                },
+                "Transmitter": {
+                    "Type": "broadcast",
+                    "Broadcast": {
+                        "WriteTimeout": 10000000000,
+                        "Pool": {
+                            "Workers": 128,
+                            "QueueSize": 1024
+                        }
+                    }
+                }
+            }
+        ]
     }
-  },
-  "HTTP": {
-    "Addr": "0.0.0.0:8080",
-    "Api": {
-      "Consumer": {
-        "Format": "json"
-      },
-      "Store": {
-        "Type": "memory",
-        "Memory": {}
-      },
-      "Transmitter": {
-        "Type": "broadcast",
-        "Broadcast": {
-          "WriteTimeout": 10000000000,
-          "Pool": {
-            "Workers": 128,
-            "QueueSize": 1024
-          }
-        }
-      }
-    }
-  }
 }
