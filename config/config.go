@@ -17,7 +17,7 @@ import (
 	"github.com/cryptounicorns/market-fetcher-http/http/endpoints"
 	"github.com/cryptounicorns/market-fetcher-http/logger"
 	"github.com/cryptounicorns/market-fetcher-http/stores"
-	"github.com/cryptounicorns/market-fetcher-http/stores/store/memory"
+	"github.com/cryptounicorns/market-fetcher-http/stores/store/memoryttl"
 	"github.com/cryptounicorns/market-fetcher-http/transmitters"
 	"github.com/cryptounicorns/market-fetcher-http/transmitters/transmitter/broadcast"
 )
@@ -49,8 +49,11 @@ var (
 					Format: "json",
 				},
 				Store: stores.Config{
-					Type:   stores.MemoryStoreType,
-					Memory: memory.Config{},
+					Type: stores.MemoryTTLStoreType,
+					MemoryTTL: memoryttl.Config{
+						TTL:        2 * time.Second,
+						Resolution: 1 * time.Second,
+					},
 				},
 				Transmitter: transmitters.Config{
 					Type: transmitters.BroadcastTransmitterType,

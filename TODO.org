@@ -71,7 +71,8 @@ exit status 2
    CLOSED: [2017-08-28 Mon 18:55]
    Concrete constructors such as api.v1.NewTickers should be eliminated
    This is the point where we should become data-agnostic.
-** TODO Replace key-based memory store
+** DONE Replace key-based memory store
+   CLOSED: [2017-08-31 Thu 23:41]
    Store which requires a key constructed from knowledge of the data structure can't
    be used in data-agnostic environment.
    There could be a ring buffer or a buffer with expire time.

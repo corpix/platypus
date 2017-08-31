@@ -9,18 +9,20 @@ import (
 	"github.com/corpix/queues"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/cryptounicorns/market-fetcher-http/consumer"
 	"github.com/cryptounicorns/market-fetcher-http/errors"
 	endpointsTransmitter "github.com/cryptounicorns/market-fetcher-http/http/endpoints/transmitter"
 	"github.com/cryptounicorns/market-fetcher-http/stores"
+	"github.com/cryptounicorns/market-fetcher-http/stores/store"
 	"github.com/cryptounicorns/market-fetcher-http/transmitters"
 	"github.com/cryptounicorns/market-fetcher-http/writerpool"
 )
 
 type Handler struct {
 	Consumer    *consumer.Consumer
-	Store       stores.Store
+	Store       store.Store
 	Format      formats.Format
 	Transmitter transmitters.Transmitter
 	WriterPool  *writerpool.WriterPool
@@ -86,27 +88,30 @@ func (h *Handler) Close() error {
 		return err
 	}
 
+	err = h.Store.Close()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (h *Handler) pump() {
 	var (
-		// ticker *market.Ticker
 		data []byte
-		// key    string
-		err error
+		err  error
 	)
 
 	for m := range h.Consumer.Consume() {
-		// FIXME: Use some sort of ring buffer for messages
-		// ticker = m.(*market.Ticker)
-		// key = ticker.CurrencyPair.String() + "|" + ticker.Market
-		// err = t.Store.Set(key, m)
-		// if err != nil {
-		// 	// XXX: If we can't set into store
-		// 	// then it is not critical, just log and go on.
-		// 	t.log.Error(err)
-		// }
+		err = h.Store.Set(
+			uuid.NewV1().String(),
+			m,
+		)
+		if err != nil {
+			// XXX: If we can't set into store
+			// then it is not critical, just log and go on.
+			h.log.Error(err)
+		}
 
 		data, err = h.Format.Marshal(m)
 		if err != nil {
@@ -134,7 +139,7 @@ func NewHandler(c Config, q queues.Queue, l loggers.Logger) (*Handler, error) {
 		ws  = writerpool.New()
 		f   formats.Format
 		cr  *consumer.Consumer
-		s   stores.Store
+		s   store.Store
 		t   transmitters.Transmitter
 		h   *Handler
 		err error
