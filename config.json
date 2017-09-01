@@ -1,7 +1,7 @@
 {
     "Logger": {
-        "Level": "debug",
-        "Formatter": ""
+        "Level": "info",
+        "Formatter": "json"
     },
     "HTTP": {
         "Addr": ":8080",
