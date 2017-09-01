@@ -61,7 +61,8 @@ exit status 2
   https://github.com/savaki/swag
 * DONE Rename Config.Feed to Config.Feeds
   CLOSED: [2017-08-25 Fri 20:27]
-* TODO Transform the whole service into bridge between MQ and websocket clients
+* DONE Transform the whole service into bridge between MQ and websocket clients
+  CLOSED: [2017-09-01 Fri 11:57]
   It should be data-agnostic.
   All endpoints and formats(for serialization) should come from config.
 ** DONE Create feeds from config
