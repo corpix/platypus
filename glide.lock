@@ -1,12 +1,12 @@
 hash: baee863f7790d16c0d21de21c34a1637bc7c30f0850dd1f6863b7ff2a53524c3
-updated: 2017-08-24T22:52:19.187496594Z
+updated: 2017-09-03T12:53:44.464219008Z
 imports:
 - name: github.com/bitly/go-nsq
   version: d71fb89c9e0263aaed89645b0b168e11ccf597b1
 - name: github.com/corpix/formats
   version: db532770e3ecf9dfe31ce2f7bf30c1c26f67e417
 - name: github.com/corpix/loggers
-  version: ca89089924c60b88d088de6337f812c04b55db83
+  version: d5c1e84397f24c1cde4386e0cc158f2dbc49e54f
   subpackages:
   - logger/logrus
   - logger/prefixwrapper
@@ -26,12 +26,9 @@ imports:
 - name: github.com/corpix/trade
   version: be34f9a7da47252c822dc4fe9aad222ff853559e
   subpackages:
-  - currencies
-  - errors
   - market
-  - markets/market
 - name: github.com/davecgh/go-spew
-  version: adab96458c51a58dc1783b3335dcce5461522e75
+  version: a476722483882dd40b8111f0eb64e1d7f43f56e4
   subpackages:
   - spew
 - name: github.com/eapache/go-resiliency
@@ -43,11 +40,11 @@ imports:
 - name: github.com/eapache/queue
   version: 44cc805cf13205b55f69e14bcb69867d1ae92f98
 - name: github.com/fatih/structs
-  version: a720dfa8df582c51dee1b36feabb906bde1588bd
+  version: 7e5a8eef611ee84dd359503f3969f80df4c50723
 - name: github.com/gobwas/httphead
   version: d8ef83dd38eff6fae44a0397340fd8a42ffd6664
 - name: github.com/gobwas/pool
-  version: bb869d364794b4730d7d8fbc4fece0a500733af8
+  version: 32dbaa12caca20fad12253c30591227e04f62cdd
   subpackages:
   - pbufio
   - pbytes
@@ -60,7 +57,7 @@ imports:
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: ac112f7d75a0714af1bd86ab17749b31f7809640
+  version: bb285ea687c5c77bb6935fdb2402b121d8efcbec
 - name: github.com/imdario/mergo
   version: e3000cb3d28c72b837601cac94debd91032d19fe
 - name: github.com/mreiferson/go-snappystream
@@ -70,13 +67,15 @@ imports:
 - name: github.com/orcaman/concurrent-map
   version: 2ae17bc4c860c83513ee50feb9746f3e50d7515d
 - name: github.com/pierrec/lz4
-  version: 5a3d2245f97fc249850e7802e3c01fad02a1c316
+  version: 08c27939df1bd95e881e2c2367a749964ad1fceb
 - name: github.com/pierrec/xxHash
   version: a0006b13c722f7f12368c00a3d3c2ae8a999a0c6
   subpackages:
   - xxHash32
 - name: github.com/rcrowley/go-metrics
   version: 1f30fe9094a513ce4c700b9a54458bbb0c96996c
+- name: github.com/satori/go.uuid
+  version: 5bf94b69c6b68ee1b541973bb8e1144db23a194b
 - name: github.com/Shopify/sarama
   version: c01858abb625b73a3af51d0798e4ad42c8147093
 - name: github.com/sirupsen/logrus
@@ -84,7 +83,7 @@ imports:
 - name: github.com/urfave/cli
   version: f017f86fccc5a039a98f23311f34fdf78b014f78
 - name: golang.org/x/sys
-  version: 07c182904dbd53199946ba614a412c61d3c548f5
+  version: 7ddbeae9ae08c6a06a59597f0c9edbc5ff2444ce
   subpackages:
   - unix
 - name: gopkg.in/yaml.v2
