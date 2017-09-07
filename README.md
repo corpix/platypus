@@ -3,7 +3,7 @@ platypus
 
 [![Build Status](https://travis-ci.org/cryptounicorns/platypus.svg?branch=master)](https://travis-ci.org/cryptounicorns/platypus)
 
-HTTP interface for data providen by [market-fetcher](https://github.com/cryptounicorns/market-fetcher).
+Receives data from user configured message queue and broadcasts it into user configured websocket endpoint.
 
 ## Development
 
