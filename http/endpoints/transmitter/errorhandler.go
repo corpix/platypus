@@ -6,8 +6,8 @@ import (
 
 	"github.com/corpix/loggers"
 
-	"github.com/cryptounicorns/market-fetcher-http/transmitters/transmitter"
-	"github.com/cryptounicorns/market-fetcher-http/writerpool"
+	"github.com/cryptounicorns/platypus/transmitters/transmitter"
+	"github.com/cryptounicorns/platypus/writerpool"
 )
 
 func WriterPoolCleanerErrorHandler(ws *writerpool.WriterPool, l loggers.Logger) transmitter.ErrorHandler {

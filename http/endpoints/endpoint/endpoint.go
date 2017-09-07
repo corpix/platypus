@@ -5,7 +5,7 @@ import (
 	"github.com/corpix/queues"
 	"github.com/gorilla/mux"
 
-	"github.com/cryptounicorns/market-fetcher-http/errors"
+	"github.com/cryptounicorns/platypus/errors"
 )
 
 type Endpoint struct {

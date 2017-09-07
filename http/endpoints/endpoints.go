@@ -4,8 +4,8 @@ import (
 	"github.com/corpix/loggers"
 	"github.com/gorilla/mux"
 
-	"github.com/cryptounicorns/market-fetcher-http/errors"
-	"github.com/cryptounicorns/market-fetcher-http/http/endpoints/endpoint"
+	"github.com/cryptounicorns/platypus/errors"
+	"github.com/cryptounicorns/platypus/http/endpoints/endpoint"
 )
 
 type Endpoints []*endpoint.Endpoint

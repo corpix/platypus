@@ -3,9 +3,9 @@ package endpoint
 import (
 	"github.com/corpix/queues"
 
-	"github.com/cryptounicorns/market-fetcher-http/consumer"
-	"github.com/cryptounicorns/market-fetcher-http/stores"
-	"github.com/cryptounicorns/market-fetcher-http/transmitters"
+	"github.com/cryptounicorns/platypus/consumer"
+	"github.com/cryptounicorns/platypus/stores"
+	"github.com/cryptounicorns/platypus/transmitters"
 )
 
 type Config struct {

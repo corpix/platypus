@@ -11,13 +11,13 @@ import (
 	"github.com/gobwas/ws/wsutil"
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/cryptounicorns/market-fetcher-http/consumer"
-	"github.com/cryptounicorns/market-fetcher-http/errors"
-	endpointsTransmitter "github.com/cryptounicorns/market-fetcher-http/http/endpoints/transmitter"
-	"github.com/cryptounicorns/market-fetcher-http/stores"
-	"github.com/cryptounicorns/market-fetcher-http/stores/store"
-	"github.com/cryptounicorns/market-fetcher-http/transmitters"
-	"github.com/cryptounicorns/market-fetcher-http/writerpool"
+	"github.com/cryptounicorns/platypus/consumer"
+	"github.com/cryptounicorns/platypus/errors"
+	endpointsTransmitter "github.com/cryptounicorns/platypus/http/endpoints/transmitter"
+	"github.com/cryptounicorns/platypus/stores"
+	"github.com/cryptounicorns/platypus/stores/store"
+	"github.com/cryptounicorns/platypus/transmitters"
+	"github.com/cryptounicorns/platypus/writerpool"
 )
 
 type Handler struct {

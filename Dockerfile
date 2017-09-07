@@ -1,10 +1,10 @@
 FROM fedora:latest
 
-RUN mkdir                       /etc/market-fetcher-http
-ADD ./build/market-fetcher-http /usr/bin/market-fetcher-http
+RUN mkdir            /etc/platypus
+ADD ./build/platypus /usr/bin/platypus
 
-CMD [                                      \
-    "/usr/bin/market-fetcher-http",        \
-    "--config",                            \
-    "/etc/market-fetcher-http/config.json" \
+CMD [                           \
+    "/usr/bin/platypus",        \
+    "--config",                 \
+    "/etc/platypus/config.json" \
 ]

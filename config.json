@@ -20,7 +20,7 @@
                     "Nsq": {
                         "Addr": "127.0.0.1:4150",
                         "Topic": "ticker",
-                        "Channel": "market-fetcher-http",
+                        "Channel": "platypus",
                         "ConsumerBufferSize": 0,
                         "LogLevel": 1,
                         "Nsq": null

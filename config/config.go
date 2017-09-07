@@ -12,14 +12,14 @@ import (
 	"github.com/corpix/queues/queue/nsq"
 	"github.com/imdario/mergo"
 
-	"github.com/cryptounicorns/market-fetcher-http/consumer"
-	"github.com/cryptounicorns/market-fetcher-http/http"
-	"github.com/cryptounicorns/market-fetcher-http/http/endpoints"
-	"github.com/cryptounicorns/market-fetcher-http/logger"
-	"github.com/cryptounicorns/market-fetcher-http/stores"
-	"github.com/cryptounicorns/market-fetcher-http/stores/store/memoryttl"
-	"github.com/cryptounicorns/market-fetcher-http/transmitters"
-	"github.com/cryptounicorns/market-fetcher-http/transmitters/transmitter/broadcast"
+	"github.com/cryptounicorns/platypus/consumer"
+	"github.com/cryptounicorns/platypus/http"
+	"github.com/cryptounicorns/platypus/http/endpoints"
+	"github.com/cryptounicorns/platypus/logger"
+	"github.com/cryptounicorns/platypus/stores"
+	"github.com/cryptounicorns/platypus/stores/store/memoryttl"
+	"github.com/cryptounicorns/platypus/transmitters"
+	"github.com/cryptounicorns/platypus/transmitters/transmitter/broadcast"
 )
 
 var (
@@ -41,7 +41,7 @@ var (
 					Nsq: nsq.Config{
 						Addr:     "127.0.0.1:4150",
 						Topic:    "ticker",
-						Channel:  "market-fetcher-http",
+						Channel:  "platypus",
 						LogLevel: nsq.LogLevelInfo,
 					},
 				},

@@ -1,8 +1,8 @@
 package stores
 
 import (
-	"github.com/cryptounicorns/market-fetcher-http/stores/store/memory"
-	"github.com/cryptounicorns/market-fetcher-http/stores/store/memoryttl"
+	"github.com/cryptounicorns/platypus/stores/store/memory"
+	"github.com/cryptounicorns/platypus/stores/store/memoryttl"
 )
 
 type Config struct {

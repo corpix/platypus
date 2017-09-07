@@ -5,7 +5,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/cryptounicorns/market-fetcher-http/http"
+	"github.com/cryptounicorns/platypus/http"
 )
 
 var (

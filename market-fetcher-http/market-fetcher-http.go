@@ -3,7 +3,7 @@ package main
 import (
 	"runtime"
 
-	"github.com/cryptounicorns/market-fetcher-http/cli"
+	"github.com/cryptounicorns/platypus/cli"
 )
 
 func init() { runtime.GOMAXPROCS(runtime.NumCPU()) }

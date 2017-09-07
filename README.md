@@ -1,7 +1,7 @@
-market-fetcher-http
+platypus
 ---------
 
-[![Build Status](https://travis-ci.org/cryptounicorns/market-fetcher-http.svg?branch=master)](https://travis-ci.org/cryptounicorns/market-fetcher-http)
+[![Build Status](https://travis-ci.org/cryptounicorns/platypus.svg?branch=master)](https://travis-ci.org/cryptounicorns/platypus)
 
 HTTP interface for data providen by [market-fetcher](https://github.com/cryptounicorns/market-fetcher).
 
@@ -96,7 +96,7 @@ $ sudo docker-compose build market-fetcher
 
 Now you should have a `cryptounicorns/market-fetcher` container. Start it:
 
-> From the root of `market-fetcher-http` repository.
+> From the root of `platypus` repository.
 
 ``` console
 $ sudo docker-compose up market-fetcher
@@ -120,13 +120,13 @@ Build a binary release:
 
 ``` console
 $ GOOS=linux make
-# This will put a binary into ./build/market-fetcher-http
+# This will put a binary into ./build/platypus
 ```
 
 #### Docker
 
 ``` console
-$ docker-compose up market-fetcher-http
+$ docker-compose up platypus
 ```
 
 #### Rkt
@@ -136,7 +136,7 @@ There is no rkt container for this service at this time.
 #### No isolation
 
 ``` console
-$ go run ./market-fetcher-http/market-fetcher-http.go --debug
+$ go run ./platypus/platypus.go --debug
 ```
 
 ## Testing
@@ -150,3 +150,11 @@ $ wsd -url ws://127.0.0.1:8080/api/v1/tickers/stream
 < {"high":266882.1,"low":252200.02,"avg":0,"vol":60.3862276,"volCur":2.35581065,"last":266882.1,"buy":256782.46,"sell":263975,"timestamp":1503190091,"currencyPair":"BTC-RUB","market":"cex"}
 ...
 ```
+
+## Name origin
+
+> Perry is the pet platypus of the Flynn-Fletcher family, and is perceived as mindless and domesticated. In secret, however, he lives a __double life__ as a member of an all-animal espionage organization referred to as O.W.C.A. (Organization Without a Cool Acronym).
+
+https://en.wikipedia.org/wiki/Perry_the_Platypus
+
+This service lives a double life, kind of :)

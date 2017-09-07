@@ -6,10 +6,10 @@ import (
 	"github.com/corpix/loggers"
 	"github.com/fatih/structs"
 
-	"github.com/cryptounicorns/market-fetcher-http/errors"
-	"github.com/cryptounicorns/market-fetcher-http/transmitters/transmitter"
-	"github.com/cryptounicorns/market-fetcher-http/transmitters/transmitter/broadcast"
-	"github.com/cryptounicorns/market-fetcher-http/transmitters/writers"
+	"github.com/cryptounicorns/platypus/errors"
+	"github.com/cryptounicorns/platypus/transmitters/transmitter"
+	"github.com/cryptounicorns/platypus/transmitters/transmitter/broadcast"
+	"github.com/cryptounicorns/platypus/transmitters/writers"
 )
 
 const (

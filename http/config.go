@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/cryptounicorns/market-fetcher-http/http/endpoints"
+	"github.com/cryptounicorns/platypus/http/endpoints"
 )
 
 type Config struct {

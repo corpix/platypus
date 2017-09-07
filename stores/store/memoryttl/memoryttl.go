@@ -6,7 +6,7 @@ import (
 	"github.com/corpix/loggers"
 	cmap "github.com/orcaman/concurrent-map"
 
-	"github.com/cryptounicorns/market-fetcher-http/errors"
+	"github.com/cryptounicorns/platypus/errors"
 )
 
 type MemoryTTL struct {

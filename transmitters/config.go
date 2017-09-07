@@ -1,7 +1,7 @@
 package transmitters
 
 import (
-	"github.com/cryptounicorns/market-fetcher-http/transmitters/transmitter/broadcast"
+	"github.com/cryptounicorns/platypus/transmitters/transmitter/broadcast"
 )
 
 type Config struct {

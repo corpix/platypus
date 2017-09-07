@@ -46,15 +46,15 @@ services:
       - "nsqlookupd:nsqlookupd"
       - "nsqd:nsqd"
 
-  market-fetcher-http:
-    image: cryptounicorns/market-fetcher-http
+  platypus:
+    image: cryptounicorns/platypus
     build: .
     volumes:
-      - ./build/market-fetcher-http:/usr/bin/market-fetcher-http
-      - ./config.json:/etc/market-fetcher-http/config.json
+      - ./build/platypus:/usr/bin/platypus
+      - ./config.json:/etc/platypus/config.json
     command: >-
-      /usr/bin/market-fetcher-http
-      --config /etc/market-fetcher-http/config.json
+      /usr/bin/platypus
+      --config /etc/platypus/config.json
       --debug
     ports:
       - "127.0.0.1:8080:8080"

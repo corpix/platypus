@@ -6,10 +6,10 @@ import (
 	"github.com/corpix/loggers"
 	"github.com/fatih/structs"
 
-	"github.com/cryptounicorns/market-fetcher-http/errors"
-	"github.com/cryptounicorns/market-fetcher-http/stores/store"
-	"github.com/cryptounicorns/market-fetcher-http/stores/store/memory"
-	"github.com/cryptounicorns/market-fetcher-http/stores/store/memoryttl"
+	"github.com/cryptounicorns/platypus/errors"
+	"github.com/cryptounicorns/platypus/stores/store"
+	"github.com/cryptounicorns/platypus/stores/store/memory"
+	"github.com/cryptounicorns/platypus/stores/store/memoryttl"
 )
 
 const (

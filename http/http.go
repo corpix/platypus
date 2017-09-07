@@ -6,8 +6,8 @@ import (
 	"github.com/corpix/loggers"
 	"github.com/gorilla/mux"
 
-	"github.com/cryptounicorns/market-fetcher-http/errors"
-	"github.com/cryptounicorns/market-fetcher-http/http/endpoints"
+	"github.com/cryptounicorns/platypus/errors"
+	"github.com/cryptounicorns/platypus/http/endpoints"
 )
 
 type Server struct {

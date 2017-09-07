@@ -3,7 +3,7 @@
 numcpus  := $(shell cat /proc/cpuinfo | grep '^processor\s*:' | wc -l)
 version  := $(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)
 
-name     := market-fetcher-http
+name     := platypus
 package  := github.com/cryptounicorns/$(name)
 
 build    := ./build

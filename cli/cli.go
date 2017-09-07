@@ -9,8 +9,8 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/urfave/cli"
 
-	"github.com/cryptounicorns/market-fetcher-http/config"
-	appLogger "github.com/cryptounicorns/market-fetcher-http/logger"
+	"github.com/cryptounicorns/platypus/config"
+	appLogger "github.com/cryptounicorns/platypus/logger"
 )
 
 var (
@@ -49,7 +49,7 @@ func Prerun(c *cli.Context) error {
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	app := cli.NewApp()
-	app.Name = "market-fetcher-http"
+	app.Name = "platypus"
 	app.Usage = "HTTP frontend for market-fetcher data"
 	app.Action = RootAction
 	app.Flags = RootFlags
