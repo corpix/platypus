@@ -50,7 +50,7 @@ func Prerun(c *cli.Context) error {
 func Execute() {
 	app := cli.NewApp()
 	app.Name = "platypus"
-	app.Usage = "HTTP frontend for market-fetcher data"
+	app.Usage = "Receives data from user configured message queue and broadcasts it to websocket clients"
 	app.Action = RootAction
 	app.Flags = RootFlags
 	app.Commands = RootCommands
