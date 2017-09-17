@@ -34,13 +34,13 @@ services:
     links:
       - "nsqlookupd:nsqlookupd"
 
-  market-fetcher:
-    image: cryptounicorns/market-fetcher
+  mole:
+    image: cryptounicorns/mole
     volumes:
-      - ./config.market-fetcher.json:/etc/market-fetcher/config.json
+      - ./config.mole.json:/etc/mole/config.json
     command: >-
-      /usr/bin/market-fetcher
-      --config /etc/market-fetcher/config.json
+      /usr/bin/mole
+      --config /etc/mole/config.json
       --debug
     links:
       - "nsqlookupd:nsqlookupd"

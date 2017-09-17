@@ -71,9 +71,9 @@ $ sudo rkt run --interactive corpix.github.io/nsq:1.0.0 \
         --topic=ticker
 ```
 
-#### Running market-fetcher
+#### Running mole
 
-We need a data producer. It called a [market-fetcher](https://github.com/cryptounicorns/market-fetcher).
+We need a data producer. It called a [mole](https://github.com/cryptounicorns/mole).
 
 This is a service which fetches market data and puts it into the message queue our HTTP API will
 be reading from.
@@ -81,25 +81,25 @@ be reading from.
 Build a binary release:
 
 ``` console
-$ git clone https://github.com/cryptounicorns/market-fetcher
-$ cd market-fetcher
+$ git clone https://github.com/cryptounicorns/mole
+$ cd mole
 $ GOOS=linux make
 ```
 
 ##### Docker
 
-> From the root of `market-fetcher` repository.
+> From the root of `mole` repository.
 
 ``` console
-$ sudo docker-compose build market-fetcher
+$ sudo docker-compose build mole
 ```
 
-Now you should have a `cryptounicorns/market-fetcher` container. Start it:
+Now you should have a `cryptounicorns/mole` container. Start it:
 
 > From the root of `platypus` repository.
 
 ``` console
-$ sudo docker-compose up market-fetcher
+$ sudo docker-compose up mole
 ```
 
 ##### Rkt
@@ -108,10 +108,10 @@ There is no rkt container for this service at this time.
 
 ##### No isolation
 
-> From the root of `market-fetcher` repository.
+> From the root of `mole` repository.
 
 ``` console
-$ go run ./market-fetcher/market-fetcher.go --debug
+$ go run ./mole/mole.go --debug
 ```
 
 ### Running fetcher HTTP API frontend
