@@ -36,8 +36,6 @@ services:
 
   mole:
     image: cryptounicorns/mole
-    volumes:
-      - ./config.mole.json:/etc/mole/config.json
     command: >-
       /usr/bin/mole
       --config /etc/mole/config.json

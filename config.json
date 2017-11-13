@@ -11,12 +11,6 @@
                 "Method": "get",
                 "Queue": {
                     "Type": "nsq",
-                    "Kafka": {
-                        "Addrs": null,
-                        "Topic": "",
-                        "ConsumerBufferSize": 0,
-                        "Kafka": null
-                    },
                     "Nsq": {
                         "Addr": "127.0.0.1:4150",
                         "Topic": "ticker",
@@ -24,32 +18,11 @@
                         "ConsumerBufferSize": 0,
                         "LogLevel": 1,
                         "Nsq": null
-                    },
-                    "Channel": {
-                        "Capacity": 0
                     }
                 },
-                "Consumer": {
-                    "Format": "json"
-                },
-                "Store": {
-                    "Type": "memoryttl",
-                    "Memory": {},
-                    "MemoryTTL": {
-                        "TTL": 2000000000,
-                        "Resolution": 1000000000
-                    }
-                },
-                "Transmitter": {
-                    "Type": "broadcast",
-                    "Broadcast": {
-                        "WriteTimeout": 10000000000,
-                        "Pool": {
-                            "Workers": 128,
-                            "QueueSize": 1024
-                        }
-                    }
-                }
+                "Consumer": {"Format": "json"},
+                "Store": {"Type": "memory"},
+                "Transmitter": {"Type": "broadcast"}
             }
         ]
     }
