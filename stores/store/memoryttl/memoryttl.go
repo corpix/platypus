@@ -5,8 +5,6 @@ import (
 
 	"github.com/corpix/loggers"
 	cmap "github.com/orcaman/concurrent-map"
-
-	"github.com/cryptounicorns/platypus/errors"
 )
 
 type MemoryTTL struct {
@@ -74,10 +72,6 @@ func (s *MemoryTTL) cancellationLoop() {
 }
 
 func New(c Config, l loggers.Logger) (*MemoryTTL, error) {
-	if l == nil {
-		return nil, errors.NewErrNilArgument(l)
-	}
-
 	var (
 		s = &MemoryTTL{
 			storage:   cmap.New(),

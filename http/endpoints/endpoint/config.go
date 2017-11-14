@@ -1,7 +1,7 @@
 package endpoint
 
 import (
-	"github.com/corpix/queues"
+	"github.com/cryptounicorns/queues"
 
 	"github.com/cryptounicorns/platypus/consumer"
 	"github.com/cryptounicorns/platypus/stores"

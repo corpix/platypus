@@ -8,7 +8,6 @@ import (
 	"github.com/corpix/loggers"
 	"github.com/corpix/pool"
 
-	"github.com/cryptounicorns/platypus/errors"
 	"github.com/cryptounicorns/platypus/transmitters/transmitter"
 	"github.com/cryptounicorns/platypus/transmitters/writers"
 )
@@ -73,19 +72,6 @@ func (b *Broadcast) Close() error {
 }
 
 func New(c Config, ws writers.Writers, w writers.Writer, e transmitter.ErrorHandler, l loggers.Logger) (*Broadcast, error) {
-	if ws == nil {
-		return nil, errors.NewErrNilArgument(ws)
-	}
-	if w == nil {
-		return nil, errors.NewErrNilArgument(w)
-	}
-	if e == nil {
-		return nil, errors.NewErrNilArgument(e)
-	}
-	if l == nil {
-		return nil, errors.NewErrNilArgument(l)
-	}
-
 	return &Broadcast{
 		log:          l,
 		Pool:         pool.NewFromConfig(c.Pool),

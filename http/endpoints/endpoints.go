@@ -4,7 +4,6 @@ import (
 	"github.com/corpix/loggers"
 	"github.com/gorilla/mux"
 
-	"github.com/cryptounicorns/platypus/errors"
 	"github.com/cryptounicorns/platypus/http/endpoints/endpoint"
 )
 
@@ -26,16 +25,6 @@ func (es Endpoints) Close() error {
 }
 
 func New(c Config, r *mux.Router, l loggers.Logger) (Endpoints, error) {
-	if c == nil {
-		return nil, errors.NewErrNilArgument(c)
-	}
-	if r == nil {
-		return nil, errors.NewErrNilArgument(r)
-	}
-	if l == nil {
-		return nil, errors.NewErrNilArgument(l)
-	}
-
 	var (
 		es  = make(Endpoints, len(c))
 		err error

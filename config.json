@@ -16,8 +16,7 @@
                         "Topic": "ticker",
                         "Channel": "platypus",
                         "ConsumerBufferSize": 0,
-                        "LogLevel": 1,
-                        "Nsq": null
+                        "LogLevel": 1
                     }
                 },
                 "Consumer": {"Format": "json"},

@@ -8,8 +8,8 @@ import (
 
 	"github.com/corpix/formats"
 	"github.com/corpix/pool"
-	"github.com/corpix/queues"
-	"github.com/corpix/queues/queue/nsq"
+	"github.com/cryptounicorns/queues"
+	"github.com/cryptounicorns/queues/queue/nsq"
 	"github.com/imdario/mergo"
 
 	"github.com/cryptounicorns/platypus/consumer"

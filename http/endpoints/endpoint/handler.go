@@ -1,18 +1,20 @@
 package endpoint
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/corpix/formats"
 	"github.com/corpix/loggers"
-	"github.com/corpix/queues"
+	"github.com/corpix/loggers/logger/prefixwrapper"
+	"github.com/cryptounicorns/queues"
+	queuesConsumer "github.com/cryptounicorns/queues/consumer"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/cryptounicorns/platypus/consumer"
-	"github.com/cryptounicorns/platypus/errors"
 	endpointsTransmitter "github.com/cryptounicorns/platypus/http/endpoints/transmitter"
 	"github.com/cryptounicorns/platypus/stores"
 	"github.com/cryptounicorns/platypus/stores/store"
@@ -96,16 +98,24 @@ func (h *Handler) Close() error {
 	return nil
 }
 
-func (h *Handler) pump() {
+func (h *Handler) pump(stream <-chan consumer.Result) {
 	var (
 		data []byte
 		err  error
 	)
 
-	for m := range h.Consumer.Consume() {
+	for r := range stream {
+		if r.Err != nil {
+			if r.Err == io.EOF {
+				break
+			}
+			h.log.Error(err)
+			continue
+		}
+
 		err = h.Store.Set(
 			uuid.NewV1().String(),
-			m,
+			r.Value,
 		)
 		if err != nil {
 			// XXX: If we can't set into store
@@ -113,7 +123,7 @@ func (h *Handler) pump() {
 			h.log.Error(err)
 		}
 
-		data, err = h.Format.Marshal(m)
+		data, err = h.Format.Marshal(r.Value)
 		if err != nil {
 			h.log.Error(err)
 			continue
@@ -127,32 +137,30 @@ func (h *Handler) pump() {
 	}
 }
 
-func NewHandler(c Config, q queues.Queue, l loggers.Logger) (*Handler, error) {
-	if q == nil {
-		return nil, errors.NewErrNilArgument(q)
-	}
-	if l == nil {
-		return nil, errors.NewErrNilArgument(l)
-	}
-
+func NewHandler(c Config, queue queues.Queue, l loggers.Logger) (*Handler, error) {
 	var (
 		ws  = writerpool.New()
-		f   formats.Format
-		cr  *consumer.Consumer
-		s   store.Store
-		t   transmitters.Transmitter
-		h   *Handler
-		err error
-	)
+		log = prefixwrapper.New(
+			fmt.Sprintf(
+				"Handler(%s, %s): ",
+				c.Method,
+				c.Path,
+			),
+			l,
+		)
 
-	f, err = formats.New(c.Consumer.Format)
-	if err != nil {
-		return nil, err
-	}
+		cr     *consumer.Consumer
+		qc     queuesConsumer.Consumer
+		s      store.Store
+		t      transmitters.Transmitter
+		h      *Handler
+		stream <-chan consumer.Result
+		err    error
+	)
 
 	s, err = stores.New(
 		c.Store,
-		l,
+		log,
 	)
 	if err != nil {
 		return nil, err
@@ -162,20 +170,26 @@ func NewHandler(c Config, q queues.Queue, l loggers.Logger) (*Handler, error) {
 		c.Transmitter,
 		ws,
 		wsutil.WriteServerText,
-		endpointsTransmitter.WriterPoolCleanerErrorHandler(ws, l),
-		l,
+		endpointsTransmitter.WriterPoolCleanerErrorHandler(ws, log),
+		log,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	cr, err = consumer.New(
-		q,
-		new(interface{}),
-		f,
-		l,
-	)
+	qc, err = queue.Consumer()
 	if err != nil {
+		return nil, err
+	}
+
+	cr, err = consumer.New(qc, c.Consumer)
+	if err != nil {
+		return nil, err
+	}
+
+	stream, err = cr.Consume()
+	if err != nil {
+		cr.Close()
 		return nil, err
 	}
 
@@ -185,10 +199,10 @@ func NewHandler(c Config, q queues.Queue, l loggers.Logger) (*Handler, error) {
 		Format:      formats.NewJSON(),
 		Transmitter: t,
 		WriterPool:  ws,
-		log:         l,
+		log:         prefixwrapper.New("! ", log),
 	}
 
-	go h.pump()
+	go h.pump(stream)
 
 	return h, nil
 }

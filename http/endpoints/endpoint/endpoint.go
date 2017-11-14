@@ -2,10 +2,8 @@ package endpoint
 
 import (
 	"github.com/corpix/loggers"
-	"github.com/corpix/queues"
+	"github.com/cryptounicorns/queues"
 	"github.com/gorilla/mux"
-
-	"github.com/cryptounicorns/platypus/errors"
 )
 
 type Endpoint struct {
@@ -33,20 +31,13 @@ func (e *Endpoint) Close() error {
 }
 
 func New(c Config, r *mux.Router, l loggers.Logger) (*Endpoint, error) {
-	if r == nil {
-		return nil, errors.NewErrNilArgument(r)
-	}
-	if l == nil {
-		return nil, errors.NewErrNilArgument(l)
-	}
-
 	var (
 		q   queues.Queue
 		h   *Handler
 		err error
 	)
 
-	q, err = queues.NewFromConfig(
+	q, err = queues.New(
 		c.Queue,
 		l,
 	)

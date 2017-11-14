@@ -6,7 +6,6 @@ import (
 	"github.com/corpix/loggers"
 	"github.com/gorilla/mux"
 
-	"github.com/cryptounicorns/platypus/errors"
 	"github.com/cryptounicorns/platypus/http/endpoints"
 )
 
@@ -34,10 +33,6 @@ func (s *Server) Close() error {
 }
 
 func New(c Config, l loggers.Logger) (*Server, error) {
-	if l == nil {
-		return nil, errors.NewErrNilArgument(l)
-	}
-
 	var (
 		r   = mux.NewRouter()
 		es  endpoints.Endpoints

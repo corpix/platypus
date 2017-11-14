@@ -3,8 +3,6 @@ package memory
 import (
 	"github.com/corpix/loggers"
 	cmap "github.com/orcaman/concurrent-map"
-
-	"github.com/cryptounicorns/platypus/errors"
 )
 
 type Memory struct {
@@ -44,10 +42,6 @@ func (s *Memory) Close() error {
 }
 
 func New(c Config, l loggers.Logger) (*Memory, error) {
-	if l == nil {
-		return nil, errors.NewErrNilArgument(l)
-	}
-
 	return &Memory{
 		storage: cmap.New(),
 		log:     l,
