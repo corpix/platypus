@@ -20,7 +20,7 @@
                     }
                 },
                 "Consumer": {"Format": "json"},
-                "Store": {"Type": "memory"},
+                "Store": {"Type": "memoryttl"},
                 "Transmitter": {"Type": "broadcast"}
             }
         ]

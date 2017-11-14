@@ -51,7 +51,7 @@ var (
 				Store: stores.Config{
 					Type: stores.MemoryTTLStoreType,
 					MemoryTTL: memoryttl.Config{
-						TTL:        2 * time.Second,
+						TTL:        30 * time.Second,
 						Resolution: 1 * time.Second,
 					},
 				},
