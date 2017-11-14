@@ -60,7 +60,7 @@ var (
 					Broadcast: broadcast.Config{
 						WriteTimeout: 10 * time.Second,
 						Pool: pool.Config{
-							Workers:   1, // FIXME: Synchromize output(some messages are blown)
+							Workers:   128,
 							QueueSize: 1024,
 						},
 					},
