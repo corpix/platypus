@@ -29,7 +29,7 @@ type upgradeCase struct {
 	onHeader  func(k, v []byte) (error, int)
 	onRequest func(h, u []byte) (error, int)
 
-	nonce        [nonceSize]byte
+	nonce        []byte
 	removeSecKey bool
 	badSecKey    bool
 
@@ -41,9 +41,8 @@ type upgradeCase struct {
 
 var upgradeCases = []upgradeCase{
 	{
-		label:    "lowercase",
-		protocol: func(sub string) bool { return true },
-		nonce:    mustMakeNonce(),
+		label: "base",
+		nonce: mustMakeNonce(),
 		req: mustMakeRequest("GET", "ws://example.org", http.Header{
 			headerUpgrade:    []string{"websocket"},
 			headerConnection: []string{"Upgrade"},
@@ -55,9 +54,8 @@ var upgradeCases = []upgradeCase{
 		}),
 	},
 	{
-		label:    "lowercase",
-		protocol: func(sub string) bool { return true },
-		nonce:    mustMakeNonce(),
+		label: "lowercase",
+		nonce: mustMakeNonce(),
 		req: mustMakeRequest("GET", "ws://example.org", http.Header{
 			strings.ToLower(headerUpgrade):    []string{"websocket"},
 			strings.ToLower(headerConnection): []string{"Upgrade"},
@@ -160,19 +158,19 @@ var upgradeCases = []upgradeCase{
 			headerConnection: []string{"Upgrade"},
 			headerSecVersion: []string{"13"},
 		}),
-		res: mustMakeErrResponse(400, ErrBadHttpRequestMethod, nil),
-		err: ErrBadHttpRequestMethod,
+		res: mustMakeErrResponse(405, ErrHandshakeBadMethod, nil),
+		err: ErrHandshakeBadMethod,
 	},
 	{
 		label: "bad_http_proto",
 		nonce: mustMakeNonce(),
-		req: setHttpProto(1, 0, mustMakeRequest("GET", "ws://example.org", http.Header{
+		req: setProto(1, 0, mustMakeRequest("GET", "ws://example.org", http.Header{
 			headerUpgrade:    []string{"websocket"},
 			headerConnection: []string{"Upgrade"},
 			headerSecVersion: []string{"13"},
 		})),
-		res: mustMakeErrResponse(400, ErrBadHttpRequestProto, nil),
-		err: ErrBadHttpRequestProto,
+		res: mustMakeErrResponse(505, ErrHandshakeBadProtocol, nil),
+		err: ErrHandshakeBadProtocol,
 	},
 	{
 		label: "bad_host",
@@ -182,8 +180,8 @@ var upgradeCases = []upgradeCase{
 			headerConnection: []string{"Upgrade"},
 			headerSecVersion: []string{"13"},
 		})),
-		res: mustMakeErrResponse(400, ErrBadHost, nil),
-		err: ErrBadHost,
+		res: mustMakeErrResponse(400, ErrHandshakeBadHost, nil),
+		err: ErrHandshakeBadHost,
 	},
 	{
 		label: "bad_upgrade",
@@ -192,8 +190,8 @@ var upgradeCases = []upgradeCase{
 			headerConnection: []string{"Upgrade"},
 			headerSecVersion: []string{"13"},
 		}),
-		res: mustMakeErrResponse(400, ErrBadUpgrade, nil),
-		err: ErrBadUpgrade,
+		res: mustMakeErrResponse(400, ErrHandshakeBadUpgrade, nil),
+		err: ErrHandshakeBadUpgrade,
 	},
 	{
 		label: "bad_upgrade",
@@ -209,8 +207,8 @@ var upgradeCases = []upgradeCase{
 		onHeader: func(k, v []byte) (error, int) {
 			return nil, 0
 		},
-		res: mustMakeErrResponse(400, ErrBadUpgrade, nil),
-		err: ErrBadUpgrade,
+		res: mustMakeErrResponse(400, ErrHandshakeBadUpgrade, nil),
+		err: ErrHandshakeBadUpgrade,
 	},
 	{
 		label: "bad_upgrade",
@@ -220,8 +218,8 @@ var upgradeCases = []upgradeCase{
 			headerConnection: []string{"Upgrade"},
 			headerSecVersion: []string{"13"},
 		}),
-		res: mustMakeErrResponse(400, ErrBadUpgrade, nil),
-		err: ErrBadUpgrade,
+		res: mustMakeErrResponse(400, ErrHandshakeBadUpgrade, nil),
+		err: ErrHandshakeBadUpgrade,
 	},
 	{
 		label: "bad_connection",
@@ -230,8 +228,8 @@ var upgradeCases = []upgradeCase{
 			headerUpgrade:    []string{"websocket"},
 			headerSecVersion: []string{"13"},
 		}),
-		res: mustMakeErrResponse(400, ErrBadConnection, nil),
-		err: ErrBadConnection,
+		res: mustMakeErrResponse(400, ErrHandshakeBadConnection, nil),
+		err: ErrHandshakeBadConnection,
 	},
 	{
 		label: "bad_connection",
@@ -241,8 +239,8 @@ var upgradeCases = []upgradeCase{
 			headerConnection: []string{"not-upgrade"},
 			headerSecVersion: []string{"13"},
 		}),
-		res: mustMakeErrResponse(400, ErrBadConnection, nil),
-		err: ErrBadConnection,
+		res: mustMakeErrResponse(400, ErrHandshakeBadConnection, nil),
+		err: ErrHandshakeBadConnection,
 	},
 	{
 		label: "bad_sec_version_x",
@@ -251,8 +249,8 @@ var upgradeCases = []upgradeCase{
 			headerUpgrade:    []string{"websocket"},
 			headerConnection: []string{"Upgrade"},
 		}),
-		res: mustMakeErrResponse(400, ErrBadSecVersion, nil),
-		err: ErrBadSecVersion,
+		res: mustMakeErrResponse(400, ErrHandshakeBadSecVersion, nil),
+		err: ErrHandshakeBadSecVersion,
 	},
 	{
 		label: "bad_sec_version",
@@ -262,10 +260,10 @@ var upgradeCases = []upgradeCase{
 			headerConnection: []string{"upgrade"},
 			headerSecVersion: []string{"15"},
 		}),
-		res: mustMakeErrResponse(426, ErrBadSecVersion, http.Header{
+		res: mustMakeErrResponse(426, ErrHandshakeBadSecVersion, http.Header{
 			headerSecVersion: []string{"13"},
 		}),
-		err: ErrBadSecVersion,
+		err: ErrHandshakeBadSecVersion,
 	},
 	{
 		label:        "bad_sec_key",
@@ -276,8 +274,8 @@ var upgradeCases = []upgradeCase{
 			headerConnection: []string{"Upgrade"},
 			headerSecVersion: []string{"13"},
 		}),
-		res: mustMakeErrResponse(400, ErrBadSecKey, nil),
-		err: ErrBadSecKey,
+		res: mustMakeErrResponse(400, ErrHandshakeBadSecKey, nil),
+		err: ErrHandshakeBadSecKey,
 	},
 	{
 		label:     "bad_sec_key",
@@ -288,8 +286,8 @@ var upgradeCases = []upgradeCase{
 			headerConnection: []string{"Upgrade"},
 			headerSecVersion: []string{"13"},
 		}),
-		res: mustMakeErrResponse(400, ErrBadSecKey, nil),
-		err: ErrBadSecKey,
+		res: mustMakeErrResponse(400, ErrHandshakeBadSecKey, nil),
+		err: ErrHandshakeBadSecKey,
 	},
 }
 
@@ -297,14 +295,14 @@ func TestHTTPUpgrader(t *testing.T) {
 	for _, test := range upgradeCases {
 		t.Run(test.label, func(t *testing.T) {
 			if !test.removeSecKey {
-				nonce := test.nonce[:]
+				nonce := test.nonce
 				if test.badSecKey {
 					nonce = nonce[:nonceSize-1]
 				}
 				test.req.Header.Set(headerSecKey, string(nonce))
 			}
 			if test.err == nil {
-				test.res.Header.Set(headerSecAccept, makeAccept(test.nonce))
+				test.res.Header.Set(headerSecAccept, string(makeAccept(test.nonce)))
 			}
 
 			// Need to emulate http server read request for truth test.
@@ -370,7 +368,7 @@ func TestUpgrader(t *testing.T) {
 				test.req.Header.Set(headerSecKey, string(nonce))
 			}
 			if test.err == nil {
-				test.res.Header.Set(headerSecAccept, makeAccept(test.nonce))
+				test.res.Header.Set(headerSecAccept, string(makeAccept(test.nonce)))
 			}
 
 			u := Upgrader{
@@ -392,6 +390,7 @@ func TestUpgrader(t *testing.T) {
 
 			hs, err := u.Upgrade(conn)
 			if test.err != err {
+
 				t.Errorf("expected error to be '%v', got '%v'", test.err, err)
 				return
 			}
@@ -618,6 +617,17 @@ func (h headersBytes) Len() int           { return len(h) }
 func (h headersBytes) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
 func (h headersBytes) Less(i, j int) bool { return bytes.Compare(h[i], h[j]) == -1 }
 
+func maskHeader(bts []byte, key, mask string) []byte {
+	lines := bytes.Split(bts, []byte("\r\n"))
+	for i, line := range lines {
+		pair := bytes.Split(line, []byte(": "))
+		if string(pair[0]) == key {
+			lines[i] = []byte(key + ": " + mask)
+		}
+	}
+	return bytes.Join(lines, []byte("\r\n"))
+}
+
 func sortHeaders(bts []byte) []byte {
 	lines := bytes.Split(bts, []byte("\r\n"))
 	if len(lines) <= 1 {
@@ -700,7 +710,7 @@ func mustMakeRequest(method, url string, headers http.Header) *http.Request {
 	return req
 }
 
-func setHttpProto(major, minor int, req *http.Request) *http.Request {
+func setProto(major, minor int, req *http.Request) *http.Request {
 	req.ProtoMajor = major
 	req.ProtoMinor = minor
 	return req
@@ -749,8 +759,9 @@ func mustMakeErrResponse(code int, err error, headers http.Header) *http.Respons
 	return res
 }
 
-func mustMakeNonce() (ret [nonceSize]byte) {
-	newNonce(ret[:])
+func mustMakeNonce() (ret []byte) {
+	ret = make([]byte, nonceSize)
+	initNonce(ret)
 	return
 }
 

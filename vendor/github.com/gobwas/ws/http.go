@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/textproto"
+	"net/url"
 	"strconv"
 
 	"github.com/gobwas/httphead"
@@ -19,6 +20,13 @@ const (
 	textUpgradeRequired = "HTTP/1.1 426 Upgrade Required\r\n" + textErrorContent
 	crlf                = "\r\n"
 	colonAndSpace       = ": "
+	commaAndSpace       = ", "
+)
+
+// Errors returned when HTTP request or response can not be parsed.
+var (
+	ErrMalformedRequest  = fmt.Errorf("malformed HTTP request")
+	ErrMalformedResponse = fmt.Errorf("malformed HTTP response")
 )
 
 var (
@@ -26,30 +34,21 @@ var (
 )
 
 var (
-	ErrMalformedHttpRequest  = fmt.Errorf("malformed HTTP request")
-	ErrMalformedHttpResponse = fmt.Errorf("malformed HTTP response")
-
-	ErrBadHttpRequestProto  = fmt.Errorf("bad HTTP request protocol version")
-	ErrBadHttpRequestMethod = fmt.Errorf("bad HTTP request method")
-
-	ErrBadHost       = fmt.Errorf("bad %q header", headerHost)
-	ErrBadUpgrade    = fmt.Errorf("bad %q header", headerUpgrade)
-	ErrBadConnection = fmt.Errorf("bad %q header", headerConnection)
-	ErrBadSecAccept  = fmt.Errorf("bad %q header", headerSecAccept)
-	ErrBadSecKey     = fmt.Errorf("bad %q header", headerSecKey)
-	ErrBadSecVersion = fmt.Errorf("bad %q header", headerSecVersion)
-)
-
-var (
+	headerHost          = textproto.CanonicalMIMEHeaderKey("Host")
 	headerUpgrade       = textproto.CanonicalMIMEHeaderKey("Upgrade")
 	headerConnection    = textproto.CanonicalMIMEHeaderKey("Connection")
-	headerHost          = textproto.CanonicalMIMEHeaderKey("Host")
-	headerOrigin        = textproto.CanonicalMIMEHeaderKey("Origin")
 	headerSecVersion    = textproto.CanonicalMIMEHeaderKey("Sec-Websocket-Version")
 	headerSecProtocol   = textproto.CanonicalMIMEHeaderKey("Sec-Websocket-Protocol")
 	headerSecExtensions = textproto.CanonicalMIMEHeaderKey("Sec-Websocket-Extensions")
 	headerSecKey        = textproto.CanonicalMIMEHeaderKey("Sec-Websocket-Key")
 	headerSecAccept     = textproto.CanonicalMIMEHeaderKey("Sec-Websocket-Accept")
+)
+
+var (
+	specHeaderValueUpgrade         = []byte("websocket")
+	specHeaderValueConnection      = []byte("Upgrade")
+	specHeaderValueConnectionLower = []byte("upgrade")
+	specHeaderValueSecVersion      = []byte("13")
 )
 
 var (
@@ -63,6 +62,12 @@ type httpRequestLine struct {
 	major, minor int
 }
 
+type httpResponseLine struct {
+	major, minor int
+	status       int
+	reason       []byte
+}
+
 // httpParseRequestLine parses http request line like "GET / HTTP/1.0".
 func httpParseRequestLine(line []byte) (req httpRequestLine, err error) {
 	var proto []byte
@@ -71,11 +76,33 @@ func httpParseRequestLine(line []byte) (req httpRequestLine, err error) {
 	var ok bool
 	req.major, req.minor, ok = httpParseVersion(proto)
 	if !ok {
-		err = ErrMalformedHttpRequest
+		err = ErrMalformedRequest
 		return
 	}
 
 	return
+}
+
+func httpParseResponseLine(line []byte) (resp httpResponseLine, err error) {
+	var (
+		proto  []byte
+		status []byte
+	)
+	proto, status, resp.reason = bsplit3(line, ' ')
+
+	var ok bool
+	resp.major, resp.minor, ok = httpParseVersion(proto)
+	if !ok {
+		return resp, ErrMalformedResponse
+	}
+
+	var convErr error
+	resp.status, convErr = asciiToInt(status)
+	if convErr != nil {
+		return resp, ErrMalformedResponse
+	}
+
+	return resp, nil
 }
 
 // httpParseVersion parses major and minor version of HTTP protocol. It returns
@@ -177,6 +204,7 @@ func btsSelectProtocol(h []byte, check func([]byte) bool) (ret string, ok bool) 
 func strSelectExtensions(h string, selected []httphead.Option, check func(httphead.Option) bool) ([]httphead.Option, bool) {
 	return btsSelectExtensions(strToBytes(h), selected, check)
 }
+
 func btsSelectExtensions(h []byte, selected []httphead.Option, check func(httphead.Option) bool) ([]httphead.Option, bool) {
 	s := httphead.OptionSelector{
 		Flags: httphead.SelectUnique | httphead.SelectCopy,
@@ -191,12 +219,61 @@ func httpWriteHeader(bw *bufio.Writer, key, value string) {
 	bw.WriteString(crlf)
 }
 
+func httpWriteHeaderBts(bw *bufio.Writer, key string, value []byte) {
+	httpWriteHeaderKey(bw, key)
+	bw.Write(value)
+	bw.WriteString(crlf)
+}
+
 func httpWriteHeaderKey(bw *bufio.Writer, key string) {
 	bw.WriteString(key)
 	bw.WriteString(colonAndSpace)
 }
 
-func httpWriteResponseUpgrade(bw *bufio.Writer, nonce [nonceSize]byte, hs Handshake, hw func(io.Writer)) {
+func httpWriteUpgradeRequest(
+	bw *bufio.Writer,
+	u *url.URL,
+	nonce []byte,
+	protocols []string,
+	extensions []httphead.Option,
+	hw func(io.Writer),
+) {
+	bw.WriteString("GET ")
+	bw.WriteString(u.RequestURI())
+	bw.WriteString(" HTTP/1.1\r\n")
+
+	httpWriteHeader(bw, headerHost, u.Host)
+
+	httpWriteHeaderBts(bw, headerUpgrade, specHeaderValueUpgrade)
+	httpWriteHeaderBts(bw, headerConnection, specHeaderValueConnection)
+	httpWriteHeaderBts(bw, headerSecVersion, specHeaderValueSecVersion)
+	httpWriteHeaderBts(bw, headerSecKey, nonce[:])
+
+	if len(protocols) > 0 {
+		httpWriteHeaderKey(bw, headerSecProtocol)
+		for i, p := range protocols {
+			if i > 0 {
+				bw.WriteString(commaAndSpace)
+			}
+			bw.WriteString(p)
+		}
+		bw.WriteString(crlf)
+	}
+
+	if len(extensions) > 0 {
+		httpWriteHeaderKey(bw, headerSecExtensions)
+		httphead.WriteOptions(bw, extensions)
+		bw.WriteString(crlf)
+	}
+
+	if hw != nil {
+		hw(bw)
+	}
+
+	bw.WriteString(crlf)
+}
+
+func httpWriteResponseUpgrade(bw *bufio.Writer, nonce []byte, hs Handshake, hw func(io.Writer)) {
 	bw.WriteString(textUpgrade)
 
 	httpWriteHeaderKey(bw, headerSecAccept)

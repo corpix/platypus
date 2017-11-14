@@ -1,0 +1,49 @@
+hash: 71e60349d1e9372c36e63d8e91b8a67793cfff37e6f89949a262ebf53b4552ba
+updated: 2017-11-13T21:00:33.794040096Z
+imports:
+- name: github.com/bitly/go-nsq
+  version: 8c1ff52dff6fd3ecc19c418649bc643b18e862fc
+- name: github.com/corpix/loggers
+  version: 69c4a7d3244f0509086d4080e8898376aeb95e09
+  subpackages:
+  - logger/logrus
+  - logger/prefixwrapper
+  - target/logrus
+- name: github.com/davecgh/go-spew
+  version: ecdeabc65495df2dec95d7c4a4c3e021903035e5
+  subpackages:
+  - spew
+- name: github.com/eapache/go-resiliency
+  version: b1fe83b5b03f624450823b751b662259ffc6af70
+  subpackages:
+  - breaker
+- name: github.com/eapache/go-xerial-snappy
+  version: bb955e01b9346ac19dc29eb16586c90ded99a98c
+- name: github.com/eapache/queue
+  version: 44cc805cf13205b55f69e14bcb69867d1ae92f98
+- name: github.com/fatih/structs
+  version: f5faa72e73092639913f5833b75e1ac1d6bc7a63
+- name: github.com/golang/snappy
+  version: 553a641470496b2327abcac10b36396bd98e45c9
+- name: github.com/pierrec/lz4
+  version: 08c27939df1bd95e881e2c2367a749964ad1fceb
+- name: github.com/pierrec/xxHash
+  version: a0006b13c722f7f12368c00a3d3c2ae8a999a0c6
+  subpackages:
+  - xxHash32
+- name: github.com/rcrowley/go-metrics
+  version: 1f30fe9094a513ce4c700b9a54458bbb0c96996c
+- name: github.com/Shopify/sarama
+  version: 240fd146ce68bcafb034cc5dc977229ffbafa8ea
+- name: github.com/sirupsen/logrus
+  version: 89742aefa4b206dcf400792f3bd35b542998eb3b
+- name: golang.org/x/crypto
+  version: 6a293f2d4b14b8e6d3f0539e383f6d0d30fce3fd
+  subpackages:
+  - ssh/terminal
+- name: golang.org/x/sys
+  version: 665f6529cca930e27b831a0d1dafffbe1c172924
+  subpackages:
+  - unix
+  - windows
+testImports: []

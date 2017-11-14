@@ -19,14 +19,14 @@ type OpCode byte
 // See https://tools.ietf.org/html/rfc6455#section-5.2
 const (
 	OpContinuation OpCode = 0x0
-	OpText                = 0x1
-	OpBinary              = 0x2
-	OpClose               = 0x8
-	OpPing                = 0x9
-	OpPong                = 0xa
+	OpText         OpCode = 0x1
+	OpBinary       OpCode = 0x2
+	OpClose        OpCode = 0x8
+	OpPing         OpCode = 0x9
+	OpPong         OpCode = 0xa
 )
 
-// IsControl checks wheter the c is control operation code.
+// IsControl checks whether the c is control operation code.
 // See https://tools.ietf.org/html/rfc6455#section-5.5
 func (c OpCode) IsControl() bool {
 	// RFC6455: Control frames are identified by opcodes where
@@ -36,7 +36,7 @@ func (c OpCode) IsControl() bool {
 	return c&0x8 != 0
 }
 
-// IsData checks wheter the c is data operation code.
+// IsData checks whether the c is data operation code.
 // See https://tools.ietf.org/html/rfc6455#section-5.6
 func (c OpCode) IsData() bool {
 	// RFC6455: Data frames (e.g., non-control frames) are identified by opcodes
@@ -46,7 +46,7 @@ func (c OpCode) IsData() bool {
 	return c&0x8 == 0
 }
 
-// IsReserved checks wheter the c is reserved operation code.
+// IsReserved checks whether the c is reserved operation code.
 // See https://tools.ietf.org/html/rfc6455#section-5.2
 func (c OpCode) IsReserved() bool {
 	// RFC6455:
@@ -81,18 +81,18 @@ var (
 // See https://tools.ietf.org/html/rfc6455#section-7.4.1
 const (
 	StatusNormalClosure           StatusCode = 1000
-	StatusGoingAway                          = 1001
-	StatusProtocolError                      = 1002
-	StatusUnsupportedData                    = 1003
-	StatusNoMeaningYet                       = 1004
-	StatusNoStatusRcvd                       = 1005
-	StatusAbnormalClosure                    = 1006
-	StatusInvalidFramePayloadData            = 1007
-	StatusPolicyViolation                    = 1008
-	StatusMessageTooBig                      = 1009
-	StatusMandatoryExt                       = 1010
-	StatusInternalServerError                = 1011
-	StatusTLSHandshake                       = 1015
+	StatusGoingAway               StatusCode = 1001
+	StatusProtocolError           StatusCode = 1002
+	StatusUnsupportedData         StatusCode = 1003
+	StatusNoMeaningYet            StatusCode = 1004
+	StatusNoStatusRcvd            StatusCode = 1005
+	StatusAbnormalClosure         StatusCode = 1006
+	StatusInvalidFramePayloadData StatusCode = 1007
+	StatusPolicyViolation         StatusCode = 1008
+	StatusMessageTooBig           StatusCode = 1009
+	StatusMandatoryExt            StatusCode = 1010
+	StatusInternalServerError     StatusCode = 1011
+	StatusTLSHandshake            StatusCode = 1015
 )
 
 // In reports whether the code is defined in given range.
@@ -100,7 +100,7 @@ func (s StatusCode) In(r StatusCodeRange) bool {
 	return r.Min <= s && s <= r.Max
 }
 
-// Empty reports wheter the code is empty.
+// Empty reports whether the code is empty.
 // Empty code has no any meaning neither app level codes nor other.
 // This method is useful just to check that code is golang default value 0.
 func (s StatusCode) Empty() bool {
@@ -290,15 +290,18 @@ func MaskFrameWith(f Frame, mask [4]byte) Frame {
 	return MaskFrameInPlaceWith(f, mask)
 }
 
-// MaskFrame masks frame and returns frame with masked payload and Mask header's field set.
-// Note that it applies xor cipher to f.Payload without copying, that is, it modifies f.Payload inplace.
+// MaskFrameInPlace masks frame and returns frame with masked payload and Mask
+// header's field set.
+// Note that it applies xor cipher to f.Payload without copying, that is, it
+// modifies f.Payload inplace.
 func MaskFrameInPlace(f Frame) Frame {
 	return MaskFrameInPlaceWith(f, NewMask())
 }
 
 // MaskFrameInPlaceWith masks frame with given mask and returns frame
 // with masked payload and Mask header's field set.
-// Note that it applies xor cipher to f.Payload without copying, that is, it modifies f.Payload inplace.
+// Note that it applies xor cipher to f.Payload without copying, that is, it
+// modifies f.Payload inplace.
 func MaskFrameInPlaceWith(f Frame, m [4]byte) Frame {
 	f.Header.Masked = true
 	f.Header.Mask = m
@@ -313,7 +316,8 @@ func NewMask() (ret [4]byte) {
 }
 
 // CompileFrame returns byte representation of given frame.
-// In terms of memory consumption it is useful to precompile static frames which are often used.
+// In terms of memory consumption it is useful to precompile static frames
+// which are often used.
 func CompileFrame(f Frame) (bts []byte, err error) {
 	buf := bytes.NewBuffer(make([]byte, 0, 16))
 	err = WriteFrame(buf, f)

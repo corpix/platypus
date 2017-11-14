@@ -1,0 +1,9 @@
+package: github.com/cryptounicorns/queues
+import:
+- package: github.com/Shopify/sarama
+- package: github.com/bitly/go-nsq
+- package: github.com/corpix/loggers
+  subpackages:
+  - target/logrus
+- package: github.com/fatih/structs
+- package: github.com/sirupsen/logrus

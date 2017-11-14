@@ -37,11 +37,25 @@ type Reader struct {
 	utf8   UTF8Reader
 }
 
+// NewReader creates new frame reader that reads from r keeping given state to
+// make some protocol validity checks when it needed.
 func NewReader(r io.Reader, s ws.State) *Reader {
 	return &Reader{
 		Source: r,
 		State:  s,
 	}
+}
+
+// NewClientSideReader is a helper function that calls NewReader with r and
+// ws.StateClientSide.
+func NewClientSideReader(r io.Reader) *Reader {
+	return NewReader(r, ws.StateClientSide)
+}
+
+// NewServerSideReader is a helper function that calls NewReader with r and
+// ws.StateServerSide.
+func NewServerSideReader(r io.Reader) *Reader {
+	return NewReader(r, ws.StateServerSide)
 }
 
 // Read implements io.Reader. It reads the next message payload into p. It
@@ -72,7 +86,7 @@ func (r *Reader) Read(p []byte) (n int, err error) {
 		if r.State.Is(ws.StateFragmented) {
 			err = nil
 		} else if r.CheckUTF8 && r.header.OpCode == ws.OpText && !r.utf8.Valid() {
-			err = ErrInvalidUtf8
+			err = ErrInvalidUTF8
 		}
 	}
 

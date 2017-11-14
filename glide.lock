@@ -1,20 +1,19 @@
-hash: baee863f7790d16c0d21de21c34a1637bc7c30f0850dd1f6863b7ff2a53524c3
-updated: 2017-09-03T12:53:44.464219008Z
+hash: c87a39864b5710b95c5b92dba0d24e42a32a34585f726a29f470bf5a26a8b7df
+updated: 2017-11-14T04:34:15.530153685Z
 imports:
 - name: github.com/bitly/go-nsq
-  version: d71fb89c9e0263aaed89645b0b168e11ccf597b1
+  version: 8c1ff52dff6fd3ecc19c418649bc643b18e862fc
 - name: github.com/corpix/formats
-  version: db532770e3ecf9dfe31ce2f7bf30c1c26f67e417
+  version: bc69a9b0a6d6f0ae857aca85288b8fceb986efc0
 - name: github.com/corpix/loggers
-  version: d5c1e84397f24c1cde4386e0cc158f2dbc49e54f
+  version: 69c4a7d3244f0509086d4080e8898376aeb95e09
   subpackages:
   - logger/logrus
   - logger/prefixwrapper
-  - target/logrus
 - name: github.com/corpix/pool
   version: 2396288b6b816f5330c0b92798177655e2509d06
-- name: github.com/corpix/queues
-  version: 108d9f1bcd92cb6cacde0336f0f895d937a93427
+- name: github.com/cryptounicorns/queues
+  version: 29e60a3c72a26c54a238373020fdcca763a0741d
   subpackages:
   - consumer
   - errors
@@ -23,12 +22,11 @@ imports:
   - queue/channel
   - queue/kafka
   - queue/nsq
-- name: github.com/corpix/trade
-  version: be34f9a7da47252c822dc4fe9aad222ff853559e
-  subpackages:
-  - market
+  - queue/readwriter
+  - queue/websocket
+  - result
 - name: github.com/davecgh/go-spew
-  version: a476722483882dd40b8111f0eb64e1d7f43f56e4
+  version: ecdeabc65495df2dec95d7c4a4c3e021903035e5
   subpackages:
   - spew
 - name: github.com/eapache/go-resiliency
@@ -40,16 +38,16 @@ imports:
 - name: github.com/eapache/queue
   version: 44cc805cf13205b55f69e14bcb69867d1ae92f98
 - name: github.com/fatih/structs
-  version: 7e5a8eef611ee84dd359503f3969f80df4c50723
+  version: f5faa72e73092639913f5833b75e1ac1d6bc7a63
 - name: github.com/gobwas/httphead
-  version: d8ef83dd38eff6fae44a0397340fd8a42ffd6664
+  version: 01c9b01b368a438f615030bbbd5e4f9e0023e15c
 - name: github.com/gobwas/pool
   version: 32dbaa12caca20fad12253c30591227e04f62cdd
   subpackages:
   - pbufio
   - pbytes
 - name: github.com/gobwas/ws
-  version: e76b8ddad654b65e621175732059786ae714ebbf
+  version: 915eed3240022c5265584c55032ef1b8c8f84168
   subpackages:
   - wsutil
 - name: github.com/golang/snappy
@@ -57,15 +55,17 @@ imports:
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: bb285ea687c5c77bb6935fdb2402b121d8efcbec
+  version: 2d5fef06b891c971b14aa6f71ca5ab6c03a36e0e
 - name: github.com/imdario/mergo
-  version: e3000cb3d28c72b837601cac94debd91032d19fe
-- name: github.com/mreiferson/go-snappystream
-  version: 028eae7ab5c4c9e2d1cb4c4ca1e53259bbe7e504
+  version: 7fe0c75c13abdee74b09fcacef5ea1c6bba6a874
+- name: github.com/naoina/go-stringutil
+  version: 6b638e95a32d0c1131db0e7fe83775cbea4a0d0b
+- name: github.com/naoina/toml
+  version: 9fafd69674167c06933b1787ae235618431ce87f
   subpackages:
-  - snappy-go
+  - ast
 - name: github.com/orcaman/concurrent-map
-  version: 2ae17bc4c860c83513ee50feb9746f3e50d7515d
+  version: d4c23bd0e01134806215ffe65ba3fd22ec6721f7
 - name: github.com/pierrec/lz4
   version: 08c27939df1bd95e881e2c2367a749964ad1fceb
 - name: github.com/pierrec/xxHash
@@ -77,15 +77,20 @@ imports:
 - name: github.com/satori/go.uuid
   version: 5bf94b69c6b68ee1b541973bb8e1144db23a194b
 - name: github.com/Shopify/sarama
-  version: c01858abb625b73a3af51d0798e4ad42c8147093
+  version: 240fd146ce68bcafb034cc5dc977229ffbafa8ea
 - name: github.com/sirupsen/logrus
-  version: 7f976d3a76720c4c27af2ba716b85d2e0a7e38b1
+  version: 89742aefa4b206dcf400792f3bd35b542998eb3b
 - name: github.com/urfave/cli
-  version: f017f86fccc5a039a98f23311f34fdf78b014f78
+  version: 44cb242eeb4d76cc813fdc69ba5c4b224677e799
+- name: golang.org/x/crypto
+  version: 9f005a07e0d31d45e6656d241bb5c0f2efd4bc94
+  subpackages:
+  - ssh/terminal
 - name: golang.org/x/sys
-  version: 7ddbeae9ae08c6a06a59597f0c9edbc5ff2444ce
+  version: 665f6529cca930e27b831a0d1dafffbe1c172924
   subpackages:
   - unix
+  - windows
 - name: gopkg.in/yaml.v2
   version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 testImports:
@@ -94,6 +99,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 890a5c3458b43e6104ff5da8dfa139d013d77544
+  version: 2aa2c176b9dab406a6970f6a55f513e8a8c8b18f
   subpackages:
   - assert

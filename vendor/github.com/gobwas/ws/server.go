@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"time"
 	_ "unsafe" // for go:linkname
 
 	"github.com/gobwas/httphead"
@@ -15,10 +16,24 @@ import (
 
 // Constants used by ConnUpgrader.
 const (
-	DefaultReadBufferSize  = 4096
-	DefaultWriteBufferSize = 512
+	DefaultServerReadBufferSize  = 4096
+	DefaultServerWriteBufferSize = 512
 )
 
+// Errors used by both client and server when preparing WebSocket handshake.
+var (
+	ErrHandshakeBadProtocol   = fmt.Errorf("handshake error: bad HTTP protocol version")
+	ErrHandshakeBadMethod     = fmt.Errorf("handshake error: bad HTTP request method")
+	ErrHandshakeBadHost       = fmt.Errorf("handshake error: bad %q header", headerHost)
+	ErrHandshakeBadUpgrade    = fmt.Errorf("handshake error: bad %q header", headerUpgrade)
+	ErrHandshakeBadConnection = fmt.Errorf("handshake error: bad %q header", headerConnection)
+	ErrHandshakeBadSecAccept  = fmt.Errorf("handshake error: bad %q header", headerSecAccept)
+	ErrHandshakeBadSecKey     = fmt.Errorf("handshake error: bad %q header", headerSecKey)
+	ErrHandshakeBadSecVersion = fmt.Errorf("handshake error: bad %q header", headerSecVersion)
+)
+
+// ErrNotHijacker is an error returned when http.ResponseWriter does not
+// implement http.Hijacker interface.
 var ErrNotHijacker = fmt.Errorf("given http.ResponseWriter is not a http.Hijacker")
 
 // DefaultHTTPUpgrader is an HTTPUpgrader that holds no options and is used by
@@ -42,6 +57,12 @@ func Upgrade(conn io.ReadWriter) (Handshake, error) {
 // HTTPUpgrader contains options for upgrading connection to websocket from
 // net/http Handler arguments.
 type HTTPUpgrader struct {
+	// Timeout is the maximum amount of time an Upgrade() will spent while
+	// writing handshake response.
+	//
+	// The default is no timeout.
+	Timeout time.Duration
+
 	// Protocol is the select function that is used to select subprotocol from
 	// list requested by client. If this field is set, then the first matched
 	// protocol is sent to a client as negotiated.
@@ -62,38 +83,38 @@ func (u HTTPUpgrader) Upgrade(r *http.Request, w http.ResponseWriter, h http.Hea
 	// See https://tools.ietf.org/html/rfc6455#section-4.1
 	// The method of the request MUST be GET, and the HTTP version MUST be at least 1.1.
 	if r.Method != http.MethodGet {
-		err = ErrBadHttpRequestMethod
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		err = ErrHandshakeBadMethod
+		http.Error(w, err.Error(), http.StatusMethodNotAllowed)
 		return
 	}
 	if r.ProtoMajor < 1 || (r.ProtoMajor == 1 && r.ProtoMinor < 1) {
-		err = ErrBadHttpRequestProto
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		err = ErrHandshakeBadProtocol
+		http.Error(w, err.Error(), http.StatusHTTPVersionNotSupported)
 		return
 	}
 	if r.Host == "" {
-		err = ErrBadHost
+		err = ErrHandshakeBadHost
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	if u := httpGetHeader(r.Header, headerUpgrade); u != "websocket" && !strEqualFold(u, "websocket") {
-		err = ErrBadUpgrade
+		err = ErrHandshakeBadUpgrade
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	if c := httpGetHeader(r.Header, headerConnection); c != "Upgrade" && !strHasToken(c, "upgrade") {
-		err = ErrBadConnection
+		err = ErrHandshakeBadConnection
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	nonce := httpGetHeader(r.Header, headerSecKey)
 	if len(nonce) != nonceSize {
-		err = ErrBadSecKey
+		err = ErrHandshakeBadSecKey
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	if v := httpGetHeader(r.Header, headerSecVersion); v != "13" {
-		err = ErrBadSecVersion
+		err = ErrHandshakeBadSecVersion
 		// According to RFC6455:
 		//
 		// If this version does not match a version understood by the server,
@@ -125,7 +146,7 @@ func (u HTTPUpgrader) Upgrade(r *http.Request, w http.ResponseWriter, h http.Hea
 			var ok bool
 			hs.Protocol, ok = strSelectProtocol(v, check)
 			if !ok {
-				err = ErrMalformedHttpRequest
+				err = ErrMalformedRequest
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
@@ -139,7 +160,7 @@ func (u HTTPUpgrader) Upgrade(r *http.Request, w http.ResponseWriter, h http.Hea
 			var ok bool
 			hs.Extensions, ok = strSelectExtensions(v, hs.Extensions, check)
 			if !ok {
-				err = ErrMalformedHttpRequest
+				err = ErrMalformedRequest
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
@@ -158,12 +179,19 @@ func (u HTTPUpgrader) Upgrade(r *http.Request, w http.ResponseWriter, h http.Hea
 		return
 	}
 
+	// Clear deadlines set by server.
+	conn.SetDeadline(noDeadline)
+	if t := u.Timeout; t != 0 {
+		conn.SetWriteDeadline(time.Now().Add(t))
+		defer conn.SetWriteDeadline(noDeadline)
+	}
+
 	var hw func(io.Writer)
 	if h != nil {
 		hw = HeaderWriter(h)
 	}
 
-	httpWriteResponseUpgrade(rw.Writer, strToNonce(nonce), hs, hw)
+	httpWriteResponseUpgrade(rw.Writer, strToBytes(nonce), hs, hw)
 	err = rw.Writer.Flush()
 
 	return
@@ -173,7 +201,7 @@ func (u HTTPUpgrader) Upgrade(r *http.Request, w http.ResponseWriter, h http.Hea
 type Upgrader struct {
 	// ReadBufferSize and WriteBufferSize is an I/O buffer sizes.
 	// They used to read and write http data while upgrading to WebSocket.
-	// Allocated buffers are pooled with sync.Pool to avoid allocations.
+	// Allocated buffers are pooled with sync.Pool to avoid extra allocations.
 	//
 	// If *bufio.ReadWriter is given to Upgrade() no allocation will be made
 	// and this sizes will not be used.
@@ -252,33 +280,26 @@ type Upgrader struct {
 	// with appropriate http status.
 	OnHeader func(key, value []byte) (err error, code int)
 
-	// BeforeUpgrade is a callback that will be called before sending
+	// OnBeforeUpgrade is a callback that will be called before sending
 	// successful upgrade response.
 	//
-	// Setting BeforeUpgrade allows user to make final application-level
+	// Setting OnBeforeUpgrade allows user to make final application-level
 	// checks and decide whether this connection is allowed to successfully
 	// upgrade to WebSocket. That is, the session checks and other application
 	// logic could be contained inside this callback.
 	//
-	// BeforeUpgrade could return header writer callback, that will be called
+	// OnBeforeUpgrade could return header writer callback, that will be called
 	// to provide some user land http headers in response.
 	//
-	// If by some reason connection should not be upgraded then BeforeUpgrade
+	// If by some reason connection should not be upgraded then OnBeforeUpgrade
 	// should return error and appropriate http status code.
 	//
 	// Note that header writer callback will be called even if err is non-nil.
-	BeforeUpgrade func() (header func(io.Writer), err error, code int)
+	OnBeforeUpgrade func() (header func(io.Writer), err error, code int)
 
 	// TODO(gobwas): maybe use here io.WriterTo or something similar instead of
 	// error missing header callback?
 }
-
-var (
-	expHeaderUpgrade         = []byte("websocket")
-	expHeaderConnection      = []byte("Upgrade")
-	expHeaderConnectionLower = []byte("upgrade")
-	expHeaderSecVersion      = []byte("13")
-)
 
 type headerWriter struct {
 	cb [3]func(io.Writer)
@@ -301,6 +322,7 @@ func (w headerWriter) flush(to io.Writer) {
 
 // Upgrade zero-copy upgrades connection to WebSocket. It interprets given conn
 // as connection with incoming HTTP Upgrade request.
+// It is a caller responsibility to manage timeouts of upgrade.
 func (u Upgrader) Upgrade(conn io.ReadWriter) (hs Handshake, err error) {
 	// headerSeen constants helps to report whether or not some header was seen
 	// during reading request bytes.
@@ -329,11 +351,11 @@ func (u Upgrader) Upgrade(conn io.ReadWriter) (hs Handshake, err error) {
 		br = brw.Reader
 		bw = brw.Writer
 	} else {
-		n := nonZero(u.ReadBufferSize, DefaultReadBufferSize)
-		br = pbufio.GetReader(conn, n)
+		br = pbufio.GetReader(conn,
+			nonZero(u.ReadBufferSize, DefaultServerReadBufferSize),
+		)
 		defer pbufio.PutReader(br)
 	}
-
 	// Read HTTP request line like "GET /ws HTTP/1.1".
 	rl, err := readLine(br)
 	if err != nil {
@@ -346,70 +368,80 @@ func (u Upgrader) Upgrade(conn io.ReadWriter) (hs Handshake, err error) {
 	}
 
 	if bw == nil {
-		bw = pbufio.GetWriter(conn, nonZero(u.WriteBufferSize, DefaultWriteBufferSize))
+		bw = pbufio.GetWriter(conn,
+			nonZero(u.WriteBufferSize, DefaultServerWriteBufferSize),
+		)
 		defer pbufio.PutWriter(bw)
 	}
+	// Use default http status code for errors.
+	code := http.StatusBadRequest
 
-	// See https://tools.ietf.org/html/rfc6455#section-4.1
-	// The method of the request MUST be GET, and the HTTP version MUST be at least 1.1.
+	// Parse and check HTTP request.
+	// As RFC6455 says:
+	//   The client's opening handshake consists of the following parts. If the
+	//   server, while reading the handshake, finds that the client did not
+	//   send a handshake that matches the description below (note that as per
+	//   [RFC2616], the order of the header fields is not important), including
+	//   but not limited to any violations of the ABNF grammar specified for
+	//   the components of the handshake, the server MUST stop processing the
+	//   client's handshake and return an HTTP response with an appropriate
+	//   error code (such as 400 Bad Request).
+	//
+	// See https://tools.ietf.org/html/rfc6455#section-4.2.1
+
+	// An HTTP/1.1 or higher GET request, including a "Request-URI".
+	//
+	// Even if RFC says "1.1 or higher" without mentioning the part of the
+	// version, we apply it only to minor part.
+	if req.major != 1 || req.minor < 1 {
+		// Abort processing the whole request because we do not even know how
+		// to actually parse it.
+		err = ErrHandshakeBadProtocol
+		httpWriteResponseError(bw, err, http.StatusHTTPVersionNotSupported, nil)
+		bw.Flush()
+		return
+	}
 	if btsToString(req.method) != http.MethodGet {
-		err = ErrBadHttpRequestMethod
-		httpWriteResponseError(bw, err, http.StatusBadRequest, nil)
+		err = ErrHandshakeBadMethod
+		httpWriteResponseError(bw, err, http.StatusMethodNotAllowed, nil)
 		bw.Flush()
 		return
 	}
-	if req.major < 1 || (req.major == 1 && req.minor < 1) {
-		err = ErrBadHttpRequestProto
-		httpWriteResponseError(bw, err, http.StatusBadRequest, nil)
-		bw.Flush()
-		return
-	}
-
 	// Start headers read/parse loop.
 	var (
 		// headerSeen reports which header was seen by setting corresponding
 		// bit on.
 		headerSeen byte
-		nonce      []byte
-
-		hcb func(io.Writer)
-		hw  headerWriter
+		nonce      nonce
+		hcb        func(io.Writer)
+		hw         headerWriter
 	)
-
-	// Use default http status code for errors.
-	code := http.StatusBadRequest
-
 	if u.Header != nil {
 		hw.add(u.Header)
 	}
-	for {
+	for err == nil {
 		line, e := readLine(br)
 		if e != nil {
 			err = e
 			return
 		}
-		// Blank line, no more lines to read.
 		if len(line) == 0 {
+			// Blank line, no more lines to read.
 			break
-		}
-		// If we already have an error just read out whole request without
-		// processing.
-		if err != nil {
-			continue
 		}
 
 		k, v, ok := httpParseHeaderLine(line)
 		if !ok {
-			err = ErrMalformedHttpRequest
+			err = ErrMalformedRequest
+			httpWriteResponseError(bw, err, http.StatusBadRequest, nil)
+			bw.Flush()
 			return
 		}
 
 		switch btsToString(k) {
 		case headerHost:
 			headerSeen |= headerSeenHost
-			if len(v) == 0 {
-				err = ErrBadHost
-			} else if onRequest := u.OnRequest; onRequest != nil {
+			if onRequest := u.OnRequest; onRequest != nil {
 				if e, c := onRequest(v, req.uri); e != nil {
 					err = e
 					code = c
@@ -418,27 +450,27 @@ func (u Upgrader) Upgrade(conn io.ReadWriter) (hs Handshake, err error) {
 
 		case headerUpgrade:
 			headerSeen |= headerSeenUpgrade
-			if !bytes.Equal(v, expHeaderUpgrade) && !btsEqualFold(v, expHeaderUpgrade) {
-				err = ErrBadUpgrade
+			if !bytes.Equal(v, specHeaderValueUpgrade) && !btsEqualFold(v, specHeaderValueUpgrade) {
+				err = ErrHandshakeBadUpgrade
 			}
 
 		case headerConnection:
 			headerSeen |= headerSeenConnection
-			if !bytes.Equal(v, expHeaderConnection) && !btsHasToken(v, expHeaderConnectionLower) {
-				err = ErrBadConnection
+			if !bytes.Equal(v, specHeaderValueConnection) && !btsHasToken(v, specHeaderValueConnectionLower) {
+				err = ErrHandshakeBadConnection
 			}
 
 		case headerSecKey:
 			headerSeen |= headerSeenSecKey
 			if len(v) != nonceSize {
-				err = ErrBadSecKey
+				err = ErrHandshakeBadSecKey
 			} else {
-				nonce = v
+				copy(nonce[:], v)
 			}
 
 		case headerSecVersion:
 			headerSeen |= headerSeenSecVersion
-			if !bytes.Equal(v, expHeaderSecVersion) {
+			if !bytes.Equal(v, specHeaderValueSecVersion) {
 				// According to RFC6455:
 				//
 				// If this version does not match a version understood by the
@@ -447,10 +479,9 @@ func (u Upgrader) Upgrade(conn io.ReadWriter) (hs Handshake, err error) {
 				// HTTP error code (such as 426 Upgrade Required) and a
 				// |Sec-WebSocket-Version| header field indicating the
 				// version(s) the server is capable of understanding.
-				err = ErrBadSecVersion
-				code = http.StatusUpgradeRequired
-
 				hw.add(headerWriterSecVersion)
+				err = ErrHandshakeBadSecVersion
+				code = http.StatusUpgradeRequired
 			}
 
 		case headerSecProtocol:
@@ -462,7 +493,7 @@ func (u Upgrader) Upgrade(conn io.ReadWriter) (hs Handshake, err error) {
 					hs.Protocol, ok = btsSelectProtocol(v, check)
 				}
 				if !ok {
-					err = ErrMalformedHttpRequest
+					err = ErrMalformedRequest
 				}
 			}
 
@@ -475,7 +506,7 @@ func (u Upgrader) Upgrade(conn io.ReadWriter) (hs Handshake, err error) {
 					hs.Extensions, ok = btsSelectExtensions(v, hs.Extensions, check)
 				}
 				if !ok {
-					err = ErrMalformedHttpRequest
+					err = ErrMalformedRequest
 				}
 			}
 
@@ -488,16 +519,26 @@ func (u Upgrader) Upgrade(conn io.ReadWriter) (hs Handshake, err error) {
 			}
 		}
 	}
-
 	switch {
 	case err == nil && headerSeen != headerSeenAll:
 		switch {
 		case headerSeen&headerSeenHost == 0:
-			err = ErrBadHost
+			// As RFC2616 says:
+			//   A client MUST include a Host header field in all HTTP/1.1
+			//   request messages. If the requested URI does not include an
+			//   Internet host name for the service being requested, then the
+			//   Host header field MUST be given with an empty value. An
+			//   HTTP/1.1 proxy MUST ensure that any request message it
+			//   forwards does contain an appropriate Host header field that
+			//   identifies the service being requested by the proxy. All
+			//   Internet-based HTTP/1.1 servers MUST respond with a 400 (Bad
+			//   Request) status code to any HTTP/1.1 request message which
+			//   lacks a Host header field.
+			err = ErrHandshakeBadHost
 		case headerSeen&headerSeenUpgrade == 0:
-			err = ErrBadUpgrade
+			err = ErrHandshakeBadUpgrade
 		case headerSeen&headerSeenConnection == 0:
-			err = ErrBadConnection
+			err = ErrHandshakeBadConnection
 		case headerSeen&headerSeenSecVersion == 0:
 			// In cause of empty or not present version we do not send 426 status,
 			// because it does not meet the ABNF rules of RFC6455:
@@ -508,20 +549,19 @@ func (u Upgrader) Upgrade(conn io.ReadWriter) (hs Handshake, err error) {
 			//
 			// That is, if version is really invalid – we sent 426 status as above, if it
 			// not present – it is 400.
-			err = ErrBadSecVersion
+			err = ErrHandshakeBadSecVersion
 		case headerSeen&headerSeenSecKey == 0:
-			err = ErrBadSecKey
+			err = ErrHandshakeBadSecKey
 		default:
 			panic("unknown headers state")
 		}
 
-	case err == nil && u.BeforeUpgrade != nil:
-		hcb, err, code = u.BeforeUpgrade()
+	case err == nil && u.OnBeforeUpgrade != nil:
+		hcb, err, code = u.OnBeforeUpgrade()
 		if hcb != nil {
 			hw.add(hcb)
 		}
 	}
-
 	if err != nil {
 		httpWriteResponseError(bw, err, code, hw.flush)
 		// Do not store Flush() error to not override already existing one.
@@ -529,7 +569,7 @@ func (u Upgrader) Upgrade(conn io.ReadWriter) (hs Handshake, err error) {
 		return
 	}
 
-	httpWriteResponseUpgrade(bw, btsToNonce(nonce), hs, hw.flush)
+	httpWriteResponseUpgrade(bw, nonce.bytes(), hs, hw.flush)
 	err = bw.Flush()
 
 	return
@@ -537,11 +577,4 @@ func (u Upgrader) Upgrade(conn io.ReadWriter) (hs Handshake, err error) {
 
 func headerWriterSecVersion(w io.Writer) {
 	w.Write(btsErrorVersion)
-}
-
-func nonZero(a, b int) int {
-	if a != 0 {
-		return a
-	}
-	return b
 }
