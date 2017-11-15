@@ -179,16 +179,21 @@ func NewHandler(c Config, queue queues.Queue, l loggers.Logger) (*Handler, error
 
 	qc, err = queue.Consumer()
 	if err != nil {
+		t.Close()
 		return nil, err
 	}
 
 	cr, err = consumer.New(qc, c.Consumer)
 	if err != nil {
+		t.Close()
+		qc.Close()
 		return nil, err
 	}
 
 	stream, err = cr.Consume()
 	if err != nil {
+		t.Close()
+		qc.Close()
 		cr.Close()
 		return nil, err
 	}
@@ -199,7 +204,7 @@ func NewHandler(c Config, queue queues.Queue, l loggers.Logger) (*Handler, error
 		Format:      formats.NewJSON(),
 		Transmitter: t,
 		WriterPool:  ws,
-		log:         prefixwrapper.New("! ", log),
+		log:         log,
 	}
 
 	go h.pump(stream)
