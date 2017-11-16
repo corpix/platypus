@@ -6,14 +6,14 @@ import (
 	"github.com/corpix/loggers"
 	"github.com/gorilla/mux"
 
-	"github.com/cryptounicorns/platypus/http/endpoints"
+	"github.com/cryptounicorns/platypus/http/handlers"
 )
 
 type Server struct {
 	Config
-	endpoints endpoints.Endpoints
-	router    *mux.Router
-	log       loggers.Logger
+	handlers handlers.Handlers
+	router   *mux.Router
+	log      loggers.Logger
 }
 
 func (s *Server) Serve() error {
@@ -29,29 +29,34 @@ func (s *Server) Serve() error {
 }
 
 func (s *Server) Close() error {
-	return s.endpoints.Close()
+	return s.handlers.Close()
 }
 
 func New(c Config, l loggers.Logger) (*Server, error) {
 	var (
 		r   = mux.NewRouter()
-		es  endpoints.Endpoints
+		hs  = make(handlers.Handlers, len(c.Handlers))
+		h   handlers.Handler
 		err error
 	)
 
-	es, err = endpoints.New(
-		c.Endpoints,
-		r,
-		l,
-	)
-	if err != nil {
-		return nil, err
+	for k, v := range c.Handlers {
+		h, err = handlers.New(
+			v,
+			r,
+			l,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		hs[k] = h
 	}
 
 	return &Server{
-		Config:    c,
-		endpoints: es,
-		router:    r,
-		log:       l,
+		Config:   c,
+		handlers: hs,
+		router:   r,
+		log:      l,
 	}, nil
 }

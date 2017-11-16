@@ -70,8 +70,6 @@ func (wp *WriterPool) Iter(fn func(io.Writer)) {
 	}
 }
 
-//
-
 // New creates new WriterPool.
 func New() *WriterPool {
 	return &WriterPool{

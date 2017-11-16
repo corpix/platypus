@@ -13,12 +13,12 @@ INFO[0001] INF    2 [ticker/platypus] rdyLoop exiting
 panic: already connected
 
 goroutine 1 [running]:
-github.com/corpix/queues/vendor/github.com/bitly/go-nsq.(*Consumer).AddConcurrentHandlers(0xc4200be600, 0xb2f440, 0xc420186210, 0x1)
-	/home/user/Projects/src/github.com/corpix/queues/vendor/github.com/bitly/go-nsq/consumer.go:1082 +0xec
-github.com/corpix/queues/vendor/github.com/bitly/go-nsq.(*Consumer).AddHandler(0xc4200be600, 0xb2f440, 0xc420186210)
-	/home/user/Projects/src/github.com/corpix/queues/vendor/github.com/bitly/go-nsq/consumer.go:1070 +0x48
-github.com/corpix/queues/queue/nsq.(*Nsq).Consume(0xc420061680, 0xc420186210, 0x2540be400, 0x80)
-	/home/user/Projects/src/github.com/corpix/queues/queue/nsq/nsq.go:27 +0x45
+github.com/cryptounicorns/queues/vendor/github.com/bitly/go-nsq.(*Consumer).AddConcurrentHandlers(0xc4200be600, 0xb2f440, 0xc420186210, 0x1)
+	/home/user/Projects/src/github.com/cryptounicorns/queues/vendor/github.com/bitly/go-nsq/consumer.go:1082 +0xec
+github.com/cryptounicorns/queues/vendor/github.com/bitly/go-nsq.(*Consumer).AddHandler(0xc4200be600, 0xb2f440, 0xc420186210)
+	/home/user/Projects/src/github.com/cryptounicorns/queues/vendor/github.com/bitly/go-nsq/consumer.go:1070 +0x48
+github.com/cryptounicorns/queues/queue/nsq.(*Nsq).Consume(0xc420061680, 0xc420186210, 0x2540be400, 0x80)
+	/home/user/Projects/src/github.com/cryptounicorns/queues/queue/nsq/nsq.go:27 +0x45
 github.com/cryptounicorns/platypus/http/api/v1.NewTickers(0x913874, 0x4, 0x9140bb, 0x6, 0x0, 0x91518f, 0x9, 0x2540be400, 0x80, 0x400, ...)
 	/home/user/Projects/src/github.com/cryptounicorns/platypus/http/api/v1/tickers.go:186 +0x582
 github.com/cryptounicorns/platypus/http/api/v1.New(0x913874, 0x4, 0x9140bb, 0x6, 0x0, 0x91518f, 0x9, 0x2540be400, 0x80, 0x400, ...)

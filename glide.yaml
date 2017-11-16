@@ -4,11 +4,13 @@ import:
 - package: github.com/corpix/loggers
   subpackages:
   - logger/logrus
+  - logger/prefixwrapper
 - package: github.com/corpix/pool
 - package: github.com/cryptounicorns/queues
   subpackages:
   - consumer
   - queue/nsq
+  - result
 - package: github.com/davecgh/go-spew
   subpackages:
   - spew
@@ -17,9 +19,7 @@ import:
   subpackages:
   - wsutil
 - package: github.com/gorilla/mux
-- package: github.com/imdario/mergo
 - package: github.com/orcaman/concurrent-map
-- package: github.com/satori/go.uuid
 - package: github.com/urfave/cli
 testImport:
 - package: github.com/sirupsen/logrus

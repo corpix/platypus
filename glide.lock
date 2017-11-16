@@ -1,5 +1,5 @@
-hash: c87a39864b5710b95c5b92dba0d24e42a32a34585f726a29f470bf5a26a8b7df
-updated: 2017-11-14T04:34:15.530153685Z
+hash: 0ceea82f3f088899bc3ebb221e10abbee756c05970c51843f21b32b2bfd0f6bf
+updated: 2017-11-16T04:24:12.300519599Z
 imports:
 - name: github.com/bitly/go-nsq
   version: 8c1ff52dff6fd3ecc19c418649bc643b18e862fc
@@ -56,8 +56,6 @@ imports:
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: 2d5fef06b891c971b14aa6f71ca5ab6c03a36e0e
-- name: github.com/imdario/mergo
-  version: 7fe0c75c13abdee74b09fcacef5ea1c6bba6a874
 - name: github.com/naoina/go-stringutil
   version: 6b638e95a32d0c1131db0e7fe83775cbea4a0d0b
 - name: github.com/naoina/toml
@@ -74,8 +72,6 @@ imports:
   - xxHash32
 - name: github.com/rcrowley/go-metrics
   version: 1f30fe9094a513ce4c700b9a54458bbb0c96996c
-- name: github.com/satori/go.uuid
-  version: 5bf94b69c6b68ee1b541973bb8e1144db23a194b
 - name: github.com/Shopify/sarama
   version: 240fd146ce68bcafb034cc5dc977229ffbafa8ea
 - name: github.com/sirupsen/logrus

@@ -64,23 +64,31 @@ func Execute() {
 }
 
 // initConfig reads in config file.
-func initConfig(c *cli.Context) error {
-	path := os.ExpandEnv(c.String("config"))
-	err := config.FromFile(path, Config)
+func initConfig(ctx *cli.Context) error {
+	var (
+		path = os.ExpandEnv(ctx.String("config"))
+		c    *config.Config
+		err  error
+	)
+
+	c, err = config.FromFile(path)
 	if err != nil {
 		return err
 	}
+
+	Config = c
+
 	return nil
 }
 
 // initLogger inits logger component with
 // parameters from config.
-func initLogger(c *cli.Context) error {
+func initLogger(ctx *cli.Context) error {
 	var (
 		err error
 	)
 
-	if c.Bool("debug") {
+	if ctx.Bool("debug") {
 		Config.Logger.Level = "debug"
 	}
 

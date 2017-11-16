@@ -18,7 +18,7 @@ var (
 			Name:   "config, c",
 			Usage:  "application configuration file",
 			EnvVar: "CONFIG",
-			Value:  "config.json",
+			Value:  "config.yaml",
 		},
 		cli.BoolFlag{
 			Name:  "debug",

@@ -1,0 +1,113 @@
+logger:
+  level: info
+  formatter: json
+
+http:
+  addr: ":8080"
+  handlers:
+
+  - path: "/api/v1/tickers/stream"
+    method: get
+    type: stream
+    format: json
+    stream:
+      format: json
+      consumer:
+        format: json
+        config:
+          type: nsq
+          nsq:
+            addr: 127.0.0.1:4150
+            topic: ticker
+            channel: platypus-stream
+            consumerBufferSize: 128
+      transmitter:
+        type: broadcast
+
+  - path: "/api/v1/tickers"
+    method: get
+    type: latest
+    format: json
+    latest:
+      format: json
+      consumer:
+        format: json
+        config:
+          type: nsq
+          nsq:
+            addr: 127.0.0.1:4150
+            topic: ticker
+            channel: platypus-latest
+            consumerBufferSize: 128
+      cache:
+        key: |
+          {{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}
+        config:
+          type: memoryttl
+
+  # - Path: "/api/v1/tickers-changes/stream"
+  #   Method: get
+  #   Type: streamwrap
+  #   Format: json
+  #   StreamWrap:
+  #     Wrap: |
+  #       function (consumer, v, k)
+  #           return {
+  #               type    = consumer.Nsq.Topic,
+  #               payload = v
+  #           }
+  #       end
+  #     Consumers:
+  #     - Type: nsq
+  #       Format: json
+  #       Nsq:
+  #         Addr: 127.0.0.1:4150
+  #         Topic: ticker
+  #         Channel: platypus-stream
+  #         ConsumerBufferSize: 128
+  #         LogLevel: 1
+  #     - Type: nsq
+  #       Format: json
+  #       Nsq:
+  #         Addr: 127.0.0.1:4150
+  #         Topic: change
+  #         Channel: platypus-stream
+  #         ConsumerBufferSize: 128
+  #         LogLevel: 1
+  #     Transmitter:
+  #       Type: broadcast
+
+  # - Path: "/api/v1/tickers-changes"
+  #   Method: get
+  #   Type: latestfold
+  #   Format: json
+  #   LatestFold:
+  #     Fold: |
+  #       function (consumer, acc, v, k)
+  #           local res = (acc or {})
+  #           res[consumer.Nsq.Topic] = v
+  #           return res
+  #       end
+  #     Consumers:
+  #     - Type: nsq
+  #       Format: json
+  #       Nsq:
+  #         Addr: 127.0.0.1:4150
+  #         Topic: ticker
+  #         Channel: platypus-latestfold
+  #         ConsumerBufferSize: 128
+  #         LogLevel: 1
+  #     - Type: nsq
+  #       Format: json
+  #       Nsq:
+  #         Addr: 127.0.0.1:4150
+  #         Topic: change
+  #         Channel: platypus-latestfold
+  #         ConsumerBufferSize: 128
+  #         LogLevel: 1
+  #     Cache:
+  #       Type: memoryttl
+  #       Key:
+  #         - .Market
+  #         - .CurrencyPair[0].Symbol
+  #         - .CurrencyPair[1].Symbol

@@ -1,10 +1,10 @@
 package http
 
 import (
-	"github.com/cryptounicorns/platypus/http/endpoints"
+	"github.com/cryptounicorns/platypus/http/handlers"
 )
 
 type Config struct {
-	Addr      string
-	Endpoints endpoints.Config
+	Addr     string
+	Handlers handlers.Configs
 }
