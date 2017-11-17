@@ -77,7 +77,6 @@ func (s *Stream) websocketWorker() {
 }
 
 func (s *Stream) ServeWebsocket(c io.WriteCloser, r *http.Request) {
-	s.log.Print("websocket handler!")
 	s.Conns.Add(c)
 }
 
