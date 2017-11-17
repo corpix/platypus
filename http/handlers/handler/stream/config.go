@@ -9,6 +9,6 @@ import (
 type Config struct {
 	Format string
 
-	Consumer    consumer.Config
-	Transmitter routers.Config
+	Consumer consumer.Config
+	Router   routers.Config
 }

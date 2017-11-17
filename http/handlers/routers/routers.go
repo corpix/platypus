@@ -13,15 +13,15 @@ import (
 )
 
 const (
-	BroadcastTransmitterType = "broadcast"
+	BroadcastRouterType = "broadcast"
 )
 
-func New(c Config, ws router.Writers, w router.Writer, e router.ErrorHandler, l loggers.Logger) (Transmitter, error) {
+func New(c Config, ws router.Writers, w router.Writer, e router.ErrorHandler, l loggers.Logger) (Router, error) {
 	var (
 		t   = strings.ToLower(c.Type)
 		log = prefixwrapper.New(
 			fmt.Sprintf(
-				"Transmitter(%s): ",
+				"Router(%s): ",
 				t,
 			),
 			l,
@@ -34,7 +34,7 @@ func New(c Config, ws router.Writers, w router.Writer, e router.ErrorHandler, l 
 		}
 
 		switch t {
-		case BroadcastTransmitterType:
+		case BroadcastRouterType:
 			return broadcast.New(
 				v.Value().(broadcast.Config),
 				ws,
@@ -45,5 +45,5 @@ func New(c Config, ws router.Writers, w router.Writer, e router.ErrorHandler, l 
 		}
 	}
 
-	return nil, NewErrUnknownTransmitterType(c.Type)
+	return nil, NewErrUnknownRouterType(c.Type)
 }

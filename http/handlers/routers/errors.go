@@ -4,18 +4,18 @@ import (
 	"fmt"
 )
 
-type ErrUnknownTransmitterType struct {
+type ErrUnknownRouterType struct {
 	t string
 }
 
-func (e *ErrUnknownTransmitterType) Error() string {
+func (e *ErrUnknownRouterType) Error() string {
 	return fmt.Sprintf(
 		"Unknown router type '%s'",
 		e.t,
 	)
 }
-func NewErrUnknownTransmitterType(t string) error {
-	return &ErrUnknownTransmitterType{t}
+func NewErrUnknownRouterType(t string) error {
+	return &ErrUnknownRouterType{t}
 }
 
 //

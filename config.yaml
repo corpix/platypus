@@ -20,7 +20,7 @@ http:
             topic: ticker
             channel: platypus-stream
             consumerBufferSize: 128
-      transmitter:
+      router:
         type: broadcast
 
   - path: "/api/v1/tickers"
@@ -71,7 +71,7 @@ http:
   #         Channel: platypus-stream
   #         ConsumerBufferSize: 128
   #         LogLevel: 1
-  #     Transmitter:
+  #     Router:
   #       Type: broadcast
 
   # - Path: "/api/v1/tickers-changes"

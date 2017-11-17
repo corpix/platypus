@@ -20,9 +20,9 @@ type Latest struct {
 	responseFormat formats.Format
 	consumerFormat formats.Format
 
-	*cache.Cache
-	queues.Queue
-	consumer.Consumer
+	Cache    *cache.Cache
+	Queue    queues.Queue
+	Consumer consumer.Consumer
 }
 
 func (l *Latest) returnError(err error, rw http.ResponseWriter) bool {

@@ -6,6 +6,6 @@ import (
 	"github.com/cryptounicorns/platypus/http/handlers/routers/router"
 )
 
-func NewTransmitterWriter() router.Writer {
+func NewRouterWriter() router.Writer {
 	return wsutil.WriteServerBinary
 }

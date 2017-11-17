@@ -54,8 +54,8 @@ var (
 						},
 					},
 					// FIXME: Rename to Router?
-					Transmitter: routers.Config{
-						Type: routers.BroadcastTransmitterType,
+					Router: routers.Config{
+						Type: routers.BroadcastRouterType,
 						Broadcast: broadcast.Config{
 							WriteTimeout: 10 * time.Second,
 							Pool: pool.Config{

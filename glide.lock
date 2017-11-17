@@ -1,5 +1,5 @@
-hash: 0ceea82f3f088899bc3ebb221e10abbee756c05970c51843f21b32b2bfd0f6bf
-updated: 2017-11-17T07:19:28.531095134Z
+hash: 0384c7d38be926eede3a21ad70178e9436930a4aa25debb0de7b97a70dbdb08e
+updated: 2017-11-17T14:33:40.026565265Z
 imports:
 - name: github.com/bitly/go-nsq
   version: 8c1ff52dff6fd3ecc19c418649bc643b18e862fc
@@ -25,6 +25,8 @@ imports:
   - queue/readwriter
   - queue/websocket
   - result
+- name: github.com/cryptounicorns/websocket
+  version: a06bba91648b580fe65afcb07c36f57821079ae7
 - name: github.com/davecgh/go-spew
   version: ecdeabc65495df2dec95d7c4a4c3e021903035e5
   subpackages:
@@ -85,7 +87,7 @@ imports:
   subpackages:
   - ssh/terminal
 - name: golang.org/x/sys
-  version: d9177daf689058d8b868ce6e528a48eff2563209
+  version: 0dd5e194bbf5eb84a39666eb4c98a4d007e4203a
   subpackages:
   - unix
   - windows

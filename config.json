@@ -12,7 +12,7 @@
                 "Type": "stream",
                 "Stream": {
                     "Format": "json",
-                    "Transmitter": {
+                    "Router": {
                         "Type": "broadcast"
                     },
                     "Consumer": {
