@@ -86,12 +86,12 @@ var (
 						},
 					},
 					Cache: cache.Config{
-						Key: "",
+						Key: `{{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}`,
 						Store: stores.Config{
 							Type: stores.MemoryTTLStoreType,
 							MemoryTTL: memoryttl.Config{
-								TTL:        30 * time.Second,
-								Resolution: 1 * time.Second,
+								TTL:        24 * time.Hour,
+								Resolution: 1 * time.Minute,
 							},
 						},
 					},

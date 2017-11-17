@@ -16,14 +16,6 @@ type MemoryTTL struct {
 }
 
 func (s *MemoryTTL) Set(key string, value interface{}) error {
-	var (
-		ttl = s.Config.TTL
-	)
-
-	if ttl <= 0 {
-		ttl = 30 * time.Second
-	}
-
 	s.log.Debug("Set ", key, value)
 
 	s.storage.Set(
@@ -32,7 +24,7 @@ func (s *MemoryTTL) Set(key string, value interface{}) error {
 	)
 	s.timeouted.Set(
 		key,
-		time.Now().Add(ttl),
+		time.Now().Add(s.Config.TTL),
 	)
 
 	return nil
@@ -67,10 +59,15 @@ func (s *MemoryTTL) Close() error {
 func (s *MemoryTTL) cancellationLoop() {
 	var (
 		resolution = s.Config.Resolution
+		ttl        = s.Config.TTL
 	)
 
 	if resolution <= 0 {
-		resolution = 5 * time.Second
+		resolution = 1 * time.Second
+	}
+
+	if ttl <= 0 {
+		ttl = 5 * time.Second
 	}
 
 	for {
