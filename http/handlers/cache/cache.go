@@ -2,6 +2,7 @@ package cache
 
 import (
 	"bytes"
+	"strings"
 	"text/template"
 
 	"github.com/corpix/loggers"
@@ -27,10 +28,7 @@ func (c *Cache) Set(value interface{}) (string, error) {
 		return key, err
 	}
 	key = string(
-		bytes.TrimRight(
-			buf.Bytes(),
-			"\n",
-		),
+		buf.Bytes(),
 	)
 
 	return key, c.Store.Set(key, value)
@@ -43,12 +41,14 @@ func New(c Config, l loggers.Logger) (*Cache, error) {
 		err error
 	)
 
-	s, err = stores.New(c.Config, l)
+	s, err = stores.New(c.Store, l)
 	if err != nil {
 		return nil, err
 	}
 
-	t, err = template.New("key").Parse(c.Key)
+	t, err = template.New("key").Parse(
+		strings.TrimSpace(c.Key),
+	)
 	if err != nil {
 		return nil, err
 	}

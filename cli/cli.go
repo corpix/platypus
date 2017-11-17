@@ -20,7 +20,7 @@ var (
 	log loggers.Logger
 
 	// Config is a container that represents the current application configuration.
-	Config = &config.Config{}
+	Config config.Config
 )
 
 // Prerun configures application before running and executing from urfave/cli.
@@ -67,16 +67,13 @@ func Execute() {
 func initConfig(ctx *cli.Context) error {
 	var (
 		path = os.ExpandEnv(ctx.String("config"))
-		c    *config.Config
 		err  error
 	)
 
-	c, err = config.FromFile(path)
+	Config, err = config.FromFile(path)
 	if err != nil {
 		return err
 	}
-
-	Config = c
 
 	return nil
 }

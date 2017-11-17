@@ -11,7 +11,6 @@ type Config struct {
 	Path   string
 	Method string
 	Type   string
-	Format string
 
 	Stream stream.Config
 	Latest latest.Config

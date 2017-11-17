@@ -9,12 +9,11 @@ http:
   - path: "/api/v1/tickers/stream"
     method: get
     type: stream
-    format: json
     stream:
       format: json
       consumer:
         format: json
-        config:
+        queue:
           type: nsq
           nsq:
             addr: 127.0.0.1:4150
@@ -27,12 +26,11 @@ http:
   - path: "/api/v1/tickers"
     method: get
     type: latest
-    format: json
     latest:
       format: json
       consumer:
         format: json
-        config:
+        queue:
           type: nsq
           nsq:
             addr: 127.0.0.1:4150
@@ -42,13 +40,12 @@ http:
       cache:
         key: |
           {{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}
-        config:
+        store:
           type: memoryttl
 
   # - Path: "/api/v1/tickers-changes/stream"
   #   Method: get
   #   Type: streamwrap
-  #   Format: json
   #   StreamWrap:
   #     Wrap: |
   #       function (consumer, v, k)
@@ -80,7 +77,6 @@ http:
   # - Path: "/api/v1/tickers-changes"
   #   Method: get
   #   Type: latestfold
-  #   Format: json
   #   LatestFold:
   #     Fold: |
   #       function (consumer, acc, v, k)

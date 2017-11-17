@@ -10,6 +10,7 @@ import (
 	"github.com/corpix/pool"
 	"github.com/cryptounicorns/queues"
 	"github.com/cryptounicorns/queues/queue/nsq"
+	"github.com/imdario/mergo"
 
 	"github.com/cryptounicorns/platypus/http"
 	"github.com/cryptounicorns/platypus/http/handlers"
@@ -38,12 +39,11 @@ var (
 				Path:   "/api/v1/tickers/stream",
 				Method: "get",
 				Type:   handlers.StreamType,
-				Format: formats.JSON,
 				Stream: stream.Config{
 					Format: formats.JSON,
 					Consumer: consumer.Config{
 						Format: formats.JSON,
-						Config: queues.Config{
+						Queue: queues.Config{
 							Type: queues.NsqQueueType,
 							Nsq: nsq.Config{
 								Addr:     "127.0.0.1:4150",
@@ -71,12 +71,11 @@ var (
 				Path:   "/api/v1/tickers",
 				Method: "get",
 				Type:   handlers.LatestType,
-				Format: formats.JSON,
 				Latest: latest.Config{
 					Format: formats.JSON,
 					Consumer: consumer.Config{
 						Format: formats.JSON,
-						Config: queues.Config{
+						Queue: queues.Config{
 							Type: queues.NsqQueueType,
 							Nsq: nsq.Config{
 								Addr:     "127.0.0.1:4150",
@@ -88,7 +87,7 @@ var (
 					},
 					Cache: cache.Config{
 						Key: "",
-						Config: stores.Config{
+						Store: stores.Config{
 							Type: stores.MemoryTTLStoreType,
 							MemoryTTL: memoryttl.Config{
 								TTL:        30 * time.Second,
@@ -114,48 +113,57 @@ type Config struct {
 	HTTP   http.Config
 }
 
-// FromReader fills Config structure `c` passed by reference with
-// parsed config data in some `f` from reader `r`.
+// FromReader returns parsed config data in some `f` from reader `r`.
 // It copies `Default` into the target structure before unmarshaling
 // config, so it will have default values.
-func FromReader(f formats.Format, r io.Reader) (*Config, error) {
+func FromReader(f formats.Format, r io.Reader) (Config, error) {
 	var (
-		c   = &Config{}
+		c   Config
 		buf []byte
 		err error
 	)
 
 	buf, err = ioutil.ReadAll(r)
 	if err != nil {
-		return nil, err
+		return c, err
 	}
 
-	err = f.Unmarshal(buf, c)
+	err = mergo.Merge(&c, Default)
 	if err != nil {
-		return nil, err
+		return c, err
+	}
+
+	err = f.Unmarshal(buf, &c)
+	if err != nil {
+		return c, err
 	}
 
 	return c, nil
 }
 
-// FromFile fills Config structure `c` passed by reference with
-// parsed config data from file in `path`.
-func FromFile(path string) (*Config, error) {
+// FromFile returns parsed config data from file in `path`.
+func FromFile(path string) (Config, error) {
 	var (
+		c   Config
 		f   formats.Format
 		r   io.ReadWriteCloser
 		err error
 	)
 	f, err = formats.NewFromPath(path)
 	if err != nil {
-		return nil, err
+		return c, err
 	}
 
 	r, err = os.Open(path)
 	if err != nil {
-		return nil, err
+		return c, err
 	}
 	defer r.Close()
 
-	return FromReader(f, r)
+	c, err = FromReader(f, r)
+	if err != nil {
+		return c, err
+	}
+
+	return c, nil
 }

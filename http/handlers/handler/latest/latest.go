@@ -166,7 +166,7 @@ func New(c Config, l loggers.Logger) (*Latest, error) {
 		return nil, err
 	}
 
-	q, err = queues.New(c.Consumer.Config, l)
+	q, err = queues.New(c.Consumer.Queue, l)
 	if err != nil {
 		ce.Close()
 		return nil, err

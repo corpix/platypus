@@ -7,5 +7,5 @@ import (
 type Config struct {
 	Format string
 
-	queues.Config
+	Queue queues.Config
 }

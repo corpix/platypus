@@ -1,0 +1,60 @@
+{
+    "Logger": {
+        "Formatter": "json",
+        "Level": "info"
+    },
+    "HTTP": {
+        "Addr": "127.0.0.1:8080",
+        "Handlers": [
+            {
+                "Method": "get",
+                "Path": "/api/v1/tickers/stream",
+                "Type": "stream",
+                "Stream": {
+                    "Format": "json",
+                    "Transmitter": {
+                        "Type": "broadcast"
+                    },
+                    "Consumer": {
+                        "Queue": {
+                            "Nsq": {
+                                "Addr": "127.0.0.1:4150",
+                                "Channel": "platypus-stream",
+                                "ConsumerBufferSize": 128,
+                                "Topic": "ticker",
+                                "LogLevel": "info"
+                            },
+                            "Type": "nsq"
+                        },
+                        "Format": "json"
+                    }
+                }
+            },
+            {
+                "Method": "get",
+                "Path": "/api/v1/tickers",
+                "Type": "latest",
+                "Latest": {
+                    "Format": "json",
+                    "Consumer": {
+                        "Format": "json",
+                        "Queue": {
+                            "Type": "nsq",
+                            "Nsq": {
+                                "Addr": "127.0.0.1:4150",
+                                "Channel": "platypus-latest",
+                                "ConsumerBufferSize": 128,
+                                "Topic": "ticker",
+                                "LogLevel": "info"
+                            }
+                        }
+                    },
+                    "Cache": {
+                        "Store": {"Type": "memoryttl"},
+                        "Key": "{{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}"
+                    }
+                }
+            }
+        ]
+    }
+}

@@ -5,7 +5,6 @@ import (
 )
 
 type Config struct {
-	Key string
-
-	stores.Config
+	Key   string
+	Store stores.Config
 }
