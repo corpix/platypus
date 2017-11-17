@@ -1,5 +1,5 @@
 hash: 0ceea82f3f088899bc3ebb221e10abbee756c05970c51843f21b32b2bfd0f6bf
-updated: 2017-11-17T02:57:41.598946549Z
+updated: 2017-11-17T07:19:28.531095134Z
 imports:
 - name: github.com/bitly/go-nsq
   version: 8c1ff52dff6fd3ecc19c418649bc643b18e862fc
@@ -56,6 +56,8 @@ imports:
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: 2d5fef06b891c971b14aa6f71ca5ab6c03a36e0e
+- name: github.com/imdario/mergo
+  version: 7fe0c75c13abdee74b09fcacef5ea1c6bba6a874
 - name: github.com/naoina/go-stringutil
   version: 6b638e95a32d0c1131db0e7fe83775cbea4a0d0b
 - name: github.com/naoina/toml
@@ -83,7 +85,7 @@ imports:
   subpackages:
   - ssh/terminal
 - name: golang.org/x/sys
-  version: bf42f188b9bc6f2cf5b8ee5a912ef1aedd0eba4c
+  version: d9177daf689058d8b868ce6e528a48eff2563209
   subpackages:
   - unix
   - windows
