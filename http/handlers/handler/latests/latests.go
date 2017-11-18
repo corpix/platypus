@@ -49,7 +49,6 @@ func (l *Latests) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 			[]templateContext,
 			len(l.Memoize),
 		)
-		buf []byte
 		err error
 	)
 
@@ -72,22 +71,15 @@ func (l *Latests) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		buf, err = l.responseFormat.Marshal(&ctx[k].Events.Value)
+		ctx[k].Events.JSON, err = l.responseFormat.Marshal(&ctx[k].Events.Value)
 		if l.returnError(err, rw, true) {
 			return
 		}
-
-		ctx[k].Events.JSON = buf
 	}
 
 	rw.WriteHeader(http.StatusOK)
 
 	err = l.wrap.Execute(rw, &ctx)
-	if l.returnError(err, rw, false) {
-		return
-	}
-
-	_, err = rw.Write(buf)
 	if l.returnError(err, rw, false) {
 		return
 	}
