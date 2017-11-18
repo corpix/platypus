@@ -32,7 +32,11 @@ func (c *Stream) Close() error {
 
 func NewStream(c Config, l loggers.Logger) (*Stream, error) {
 	var (
-		cr  = &Stream{Meta: &Meta{}}
+		cr = &Stream{
+			Meta: &Meta{
+				Config: c,
+			},
+		}
 		err error
 	)
 

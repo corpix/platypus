@@ -95,7 +95,7 @@
                             }
                         }
                     ],
-                    "Wrap": "{\"type\":\"{{ .Consumer.Topic }}\",\"payload\":{{ .EventJSON }}}",
+                    "Wrap": "{\"type\":\"{{- .Consumer.Queue.Nsq.Topic -}}\",\"payload\":{{- (printf \"%s\" .Event.JSON) -}}}",
                     "Router": {
                         "Type": "broadcast",
                         "Broadcast": {

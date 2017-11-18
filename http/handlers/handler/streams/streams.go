@@ -3,6 +3,8 @@ package streams
 import (
 	"io"
 	"net/http"
+	"strings"
+	"text/template"
 
 	"github.com/corpix/formats"
 	"github.com/corpix/loggers"
@@ -25,7 +27,7 @@ type Streams struct {
 	Consumers       []*consumer.Stream
 }
 
-func (s *Streams) websocketWorker(meta *consumer.Meta) {
+func (s *Streams) websocketWorker(wrap *template.Template, meta *consumer.Meta) {
 	for {
 		select {
 		case <-s.done:
@@ -50,7 +52,25 @@ func (s *Streams) websocketWorker(meta *consumer.Meta) {
 				continue
 			}
 
-			_, err = s.Router.Write(buf)
+			err = wrap.Execute(
+				s.Router,
+				struct {
+					Consumer consumer.Config
+					Event    struct {
+						JSON  []byte
+						Value interface{}
+					}
+				}{
+					Consumer: meta.Config,
+					Event: struct {
+						JSON  []byte
+						Value interface{}
+					}{
+						JSON:  buf,
+						Value: v,
+					},
+				},
+			)
 			if err != nil {
 				s.log.Error(err)
 				continue
@@ -59,9 +79,9 @@ func (s *Streams) websocketWorker(meta *consumer.Meta) {
 	}
 }
 
-func (s *Streams) websocketWorkers() {
+func (s *Streams) websocketWorkers(wrap *template.Template) {
 	for _, cr := range s.Consumers {
-		go s.websocketWorker(cr.Meta)
+		go s.websocketWorker(wrap, cr.Meta)
 	}
 }
 
@@ -92,13 +112,21 @@ func New(c Config, l loggers.Logger) (*Streams, error) {
 	var (
 		writerPool      = iopool.NewWriter()
 		websocketFormat formats.Format
-		r               routers.Router
 		consumers       []*consumer.Stream
+		t               *template.Template
+		r               routers.Router
 		s               *Streams
 		err             error
 	)
 
 	websocketFormat, err = formats.New(c.Format)
+	if err != nil {
+		return nil, err
+	}
+
+	t, err = template.New("wrap").Parse(
+		strings.TrimSpace(c.Wrap),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +157,7 @@ func New(c Config, l loggers.Logger) (*Streams, error) {
 
 	s.UpgradeHandler = websocket.NewUpgradeHandler(s, l)
 
-	s.websocketWorkers()
+	s.websocketWorkers(t)
 
 	return s, nil
 }
