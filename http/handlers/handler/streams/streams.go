@@ -1,6 +1,7 @@
 package streams
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 	"strings"
@@ -59,8 +60,12 @@ func (s *Streams) consumerWorker(wrap *template.Template, consumer *consumer.Con
 				continue
 			}
 
+			var (
+				res = bytes.NewBuffer(nil)
+			)
+
 			err = wrap.Execute(
-				s.Router,
+				res,
 				templateContext{
 					Consumer: consumer.Meta.Config,
 					Event: templateEventContext{
@@ -69,6 +74,12 @@ func (s *Streams) consumerWorker(wrap *template.Template, consumer *consumer.Con
 					},
 				},
 			)
+			if err != nil {
+				s.log.Error(err)
+				continue
+			}
+
+			_, err = s.Router.Write(res.Bytes())
 			if err != nil {
 				s.log.Error(err)
 				continue
