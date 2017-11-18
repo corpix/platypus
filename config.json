@@ -92,7 +92,7 @@
 					"Resolution": "1m"
 				    }
                                 },
-                                "Key": "{{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}"
+                                "Key": "{{.period}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}"
                             }
                         }
                     ],
