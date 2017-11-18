@@ -1,7 +1,7 @@
 package memoryttl
 
 import (
-	"time"
+	"github.com/cryptounicorns/platypus/time"
 )
 
 type Config struct {

@@ -5,6 +5,8 @@ import (
 
 	"github.com/corpix/loggers"
 	cmap "github.com/orcaman/concurrent-map"
+
+	jsonTime "github.com/cryptounicorns/platypus/time"
 )
 
 type MemoryTTL struct {
@@ -24,7 +26,9 @@ func (s *MemoryTTL) Set(key string, value interface{}) error {
 	)
 	s.timeouted.Set(
 		key,
-		time.Now().Add(s.Config.TTL),
+		time.Now().Add(
+			s.Config.TTL.Duration(),
+		),
 	)
 
 	return nil
@@ -63,18 +67,18 @@ func (s *MemoryTTL) cancellationLoop() {
 	)
 
 	if resolution <= 0 {
-		resolution = 1 * time.Second
+		resolution = jsonTime.Duration(1 * time.Second)
 	}
 
 	if ttl <= 0 {
-		ttl = 5 * time.Second
+		ttl = jsonTime.Duration(5 * time.Second)
 	}
 
 	for {
 		select {
 		case <-s.done:
 			return
-		case <-time.After(resolution):
+		case <-time.After(resolution.Duration()):
 			for k, v := range s.timeouted.Items() {
 				if time.Now().After(v.(time.Time)) {
 					s.Remove(k)

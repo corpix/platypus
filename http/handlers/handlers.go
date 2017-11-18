@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/cryptounicorns/platypus/http/handlers/handler/latest"
+	"github.com/cryptounicorns/platypus/http/handlers/handler/latests"
 	"github.com/cryptounicorns/platypus/http/handlers/handler/stream"
 	"github.com/cryptounicorns/platypus/http/handlers/handler/streams"
 )
@@ -61,6 +62,14 @@ func New(c Config, r *mux.Router, l loggers.Logger) (Handler, error) {
 		case LatestType:
 			h, err = latest.New(
 				v.Value().(latest.Config),
+				log,
+			)
+			if err != nil {
+				return nil, err
+			}
+		case LatestsType:
+			h, err = latests.New(
+				v.Value().(latests.Config),
 				log,
 			)
 			if err != nil {

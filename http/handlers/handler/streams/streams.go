@@ -16,6 +16,15 @@ import (
 	"github.com/cryptounicorns/platypus/iopool"
 )
 
+type templateEventContext struct {
+	JSON  []byte
+	Value interface{}
+}
+type templateContext struct {
+	Consumer consumer.Config
+	Event    templateEventContext
+}
+
 type Streams struct {
 	*websocket.UpgradeHandler
 	config          Config
@@ -24,29 +33,28 @@ type Streams struct {
 	websocketFormat formats.Format
 	Connections     *iopool.Writer
 	Router          routers.Router
-	Consumers       []*consumer.Stream
+	Consumers       []*consumer.Consumer
 }
 
-func (s *Streams) websocketWorker(wrap *template.Template, meta *consumer.Meta) {
+func (s *Streams) consumerWorker(wrap *template.Template, consumer *consumer.Consumer) {
+	var (
+		buf []byte
+		err error
+	)
+
 	for {
 		select {
 		case <-s.done:
 			return
-		case r := <-meta.Stream:
+		case r := <-consumer.Stream():
 			// FIXME: I don't like this error handling
-			var (
-				v   = r.Value
-				buf []byte
-				err error
-			)
-
 			if r.Err != nil {
 				// XXX: Consumer always closes after error, so return here.
 				s.log.Error(r.Err)
 				return
 			}
 
-			buf, err = s.websocketFormat.Marshal(v)
+			buf, err = s.websocketFormat.Marshal(r.Value)
 			if err != nil {
 				s.log.Error(r.Err)
 				continue
@@ -54,20 +62,11 @@ func (s *Streams) websocketWorker(wrap *template.Template, meta *consumer.Meta) 
 
 			err = wrap.Execute(
 				s.Router,
-				struct {
-					Consumer consumer.Config
-					Event    struct {
-						JSON  []byte
-						Value interface{}
-					}
-				}{
-					Consumer: meta.Config,
-					Event: struct {
-						JSON  []byte
-						Value interface{}
-					}{
+				templateContext{
+					Consumer: consumer.Meta.Config,
+					Event: templateEventContext{
 						JSON:  buf,
-						Value: v,
+						Value: r.Value,
 					},
 				},
 			)
@@ -79,9 +78,9 @@ func (s *Streams) websocketWorker(wrap *template.Template, meta *consumer.Meta) 
 	}
 }
 
-func (s *Streams) websocketWorkers(wrap *template.Template) {
+func (s *Streams) consumersWorkers(wrap *template.Template) {
 	for _, cr := range s.Consumers {
-		go s.websocketWorker(wrap, cr.Meta)
+		go s.consumerWorker(wrap, cr)
 	}
 }
 
@@ -110,16 +109,16 @@ func (s *Streams) Close() error {
 
 func New(c Config, l loggers.Logger) (*Streams, error) {
 	var (
-		writerPool      = iopool.NewWriter()
-		websocketFormat formats.Format
-		consumers       []*consumer.Stream
-		t               *template.Template
-		r               routers.Router
-		s               *Streams
-		err             error
+		wp  = iopool.NewWriter()
+		wf  formats.Format
+		cs  []*consumer.Consumer
+		t   *template.Template
+		r   routers.Router
+		s   *Streams
+		err error
 	)
 
-	websocketFormat, err = formats.New(c.Format)
+	wf, err = formats.New(c.Format)
 	if err != nil {
 		return nil, err
 	}
@@ -130,18 +129,17 @@ func New(c Config, l loggers.Logger) (*Streams, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	r, err = routers.New(
 		c.Router,
-		writerPool,
-		routers.NewWriterPoolCleaner(writerPool, l),
+		wp,
+		routers.NewWriterPoolCleaner(wp, l),
 		l,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	consumers, err = consumer.NewStreams(c.Consumers, l)
+	cs, err = consumer.NewConsumers(c.Consumers, l)
 	if err != nil {
 		return nil, err
 	}
@@ -149,15 +147,16 @@ func New(c Config, l loggers.Logger) (*Streams, error) {
 	s = &Streams{
 		config:          c,
 		log:             l,
-		websocketFormat: websocketFormat,
-		Connections:     writerPool,
+		done:            make(chan struct{}),
+		websocketFormat: wf,
+		Connections:     wp,
 		Router:          r,
-		Consumers:       consumers,
+		Consumers:       cs,
 	}
 
 	s.UpgradeHandler = websocket.NewUpgradeHandler(s, l)
 
-	s.websocketWorkers(t)
+	s.consumersWorkers(t)
 
 	return s, nil
 }

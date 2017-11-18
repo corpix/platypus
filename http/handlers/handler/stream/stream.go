@@ -22,15 +22,15 @@ type Stream struct {
 	websocketFormat formats.Format
 	Connections     *iopool.Writer
 	Router          routers.Router
-	Consumer        *consumer.Stream
+	Consumer        *consumer.Consumer
 }
 
-func (s *Stream) websocketWorker(meta *consumer.Meta) {
+func (s *Stream) consumerWorker() {
 	for {
 		select {
 		case <-s.done:
 			return
-		case r := <-meta.Stream:
+		case r := <-s.Consumer.Stream():
 			// FIXME: I don't like this error handling
 			var (
 				v   = r.Value
@@ -80,30 +80,30 @@ func (s *Stream) Close() error {
 
 func New(c Config, l loggers.Logger) (*Stream, error) {
 	var (
-		writerPool      = iopool.NewWriter()
-		websocketFormat formats.Format
-		router          routers.Router
-		cr              *consumer.Stream
-		stream          *Stream
-		err             error
+		wp     = iopool.NewWriter()
+		wf     formats.Format
+		r      routers.Router
+		cr     *consumer.Consumer
+		stream *Stream
+		err    error
 	)
 
-	websocketFormat, err = formats.New(c.Format)
+	wf, err = formats.New(c.Format)
 	if err != nil {
 		return nil, err
 	}
 
-	router, err = routers.New(
+	r, err = routers.New(
 		c.Router,
-		writerPool,
-		routers.NewWriterPoolCleaner(writerPool, l),
+		wp,
+		routers.NewWriterPoolCleaner(wp, l),
 		l,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	cr, err = consumer.NewStream(
+	cr, err = consumer.New(
 		c.Consumer,
 		l,
 	)
@@ -114,9 +114,10 @@ func New(c Config, l loggers.Logger) (*Stream, error) {
 	stream = &Stream{
 		config:          c,
 		log:             l,
-		websocketFormat: websocketFormat,
-		Connections:     writerPool,
-		Router:          router,
+		done:            make(chan struct{}),
+		websocketFormat: wf,
+		Connections:     wp,
+		Router:          r,
 		Consumer:        cr,
 	}
 
@@ -125,7 +126,7 @@ func New(c Config, l loggers.Logger) (*Stream, error) {
 		l,
 	)
 
-	go stream.websocketWorker(cr.Meta)
+	go stream.consumerWorker()
 
 	return stream, nil
 }

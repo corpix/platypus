@@ -1,4 +1,4 @@
-package latest
+package latests
 
 import (
 	"github.com/cryptounicorns/platypus/http/handlers/memoize"
@@ -6,5 +6,6 @@ import (
 
 type Config struct {
 	Format  string
-	Memoize memoize.Config
+	Memoize []memoize.Config
+	Wrap    string
 }

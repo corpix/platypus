@@ -18,6 +18,7 @@ import (
 	"github.com/cryptounicorns/platypus/http/handlers/consumer"
 	"github.com/cryptounicorns/platypus/http/handlers/handler/latest"
 	"github.com/cryptounicorns/platypus/http/handlers/handler/stream"
+	"github.com/cryptounicorns/platypus/http/handlers/memoize"
 	"github.com/cryptounicorns/platypus/http/handlers/routers"
 	"github.com/cryptounicorns/platypus/http/handlers/routers/router/broadcast"
 	"github.com/cryptounicorns/platypus/logger"
@@ -74,25 +75,27 @@ var (
 				Type:   handlers.LatestType,
 				Latest: latest.Config{
 					Format: formats.JSON,
-					Consumer: consumer.Config{
-						Format: formats.JSON,
-						Queue: queues.Config{
-							Type: queues.NsqQueueType,
-							Nsq: nsq.Config{
-								Addr:     "127.0.0.1:4150",
-								Topic:    "ticker",
-								Channel:  "platypus-latest",
-								LogLevel: nsq.LogLevelInfo,
+					Memoize: memoize.Config{
+						Consumer: consumer.Config{
+							Format: formats.JSON,
+							Queue: queues.Config{
+								Type: queues.NsqQueueType,
+								Nsq: nsq.Config{
+									Addr:     "127.0.0.1:4150",
+									Topic:    "ticker",
+									Channel:  "platypus-latest",
+									LogLevel: nsq.LogLevelInfo,
+								},
 							},
 						},
-					},
-					Cache: cache.Config{
-						Key: `{{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}`,
-						Store: stores.Config{
-							Type: stores.MemoryTTLStoreType,
-							MemoryTTL: memoryttl.Config{
-								TTL:        24 * time.Hour,
-								Resolution: 1 * time.Minute,
+						Cache: cache.Config{
+							Key: `{{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}`,
+							Store: stores.Config{
+								Type: stores.MemoryTTLStoreType,
+								MemoryTTL: memoryttl.Config{
+									TTL:        jsonTime.Duration(24 * time.Hour),
+									Resolution: jsonTime.Duration(1 * time.Minute),
+								},
 							},
 						},
 					},

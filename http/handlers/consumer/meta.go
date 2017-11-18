@@ -9,5 +9,5 @@ type Meta struct {
 	queues.Queue
 	Config Config
 	Format formats.Format
-	Stream <-chan Result
+	stream <-chan Result
 }
