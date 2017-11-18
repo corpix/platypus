@@ -49,9 +49,8 @@ func (s *Streams) consumerWorker(wrap *template.Template, consumer *consumer.Con
 		case r := <-consumer.Stream():
 			// FIXME: I don't like this error handling
 			if r.Err != nil {
-				// XXX: Consumer always closes after error, so return here.
 				s.log.Error(r.Err)
-				return
+				continue
 			}
 
 			buf, err = s.websocketFormat.Marshal(r.Value)

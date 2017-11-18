@@ -7,6 +7,8 @@ import (
 	"github.com/corpix/loggers/logger/logrus"
 	logrusLogger "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+
+	jsonTime "github.com/cryptounicorns/platypus/time"
 )
 
 func TestMemoryTTL(t *testing.T) {
@@ -68,8 +70,8 @@ func TestMemoryTTL(t *testing.T) {
 
 				store, err = New(
 					Config{
-						TTL:        10 * time.Millisecond,
-						Resolution: 5 * time.Millisecond,
+						TTL:        jsonTime.Duration(10 * time.Millisecond),
+						Resolution: jsonTime.Duration(5 * time.Millisecond),
 					},
 					log,
 				)

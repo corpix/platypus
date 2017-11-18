@@ -38,9 +38,8 @@ func (s *Stream) consumerWorker() {
 				err error
 			)
 			if r.Err != nil {
-				// XXX: Consumer always closes after error, so return here.
 				s.log.Error(r.Err)
-				return
+				continue
 			}
 
 			buf, err = s.websocketFormat.Marshal(v)

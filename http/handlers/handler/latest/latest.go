@@ -76,7 +76,7 @@ func (l *Latest) consumerWorker() {
 		case r := <-l.Memoize.Consumer.Stream():
 			if r.Err != nil {
 				l.log.Error(r.Err)
-				return
+				continue
 			}
 
 			if err != nil {
