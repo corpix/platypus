@@ -4,4 +4,4 @@ import (
 	"io"
 )
 
-type Router io.WriteCloser
+type Router = io.WriteCloser

@@ -1,9 +1,9 @@
 package broadcast
 
 import (
-	"time"
-
 	"github.com/corpix/pool"
+
+	"github.com/cryptounicorns/platypus/time"
 )
 
 type Config struct {

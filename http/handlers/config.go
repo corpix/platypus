@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/cryptounicorns/platypus/http/handlers/handler/latest"
 	"github.com/cryptounicorns/platypus/http/handlers/handler/stream"
+	"github.com/cryptounicorns/platypus/http/handlers/handler/streams"
 )
 
 type Configs = []Config
@@ -12,6 +13,7 @@ type Config struct {
 	Method string
 	Type   string
 
-	Stream stream.Config
-	Latest latest.Config
+	Stream  stream.Config
+	Streams streams.Config
+	Latest  latest.Config
 }

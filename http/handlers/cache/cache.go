@@ -7,7 +7,7 @@ import (
 
 	"github.com/corpix/loggers"
 
-	"github.com/cryptounicorns/platypus/http/handlers/stores"
+	"github.com/cryptounicorns/platypus/stores"
 )
 
 type Cache struct {

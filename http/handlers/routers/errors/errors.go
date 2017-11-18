@@ -1,4 +1,4 @@
-package routers
+package errors
 
 import (
 	"fmt"
@@ -17,5 +17,3 @@ func (e *ErrUnknownRouterType) Error() string {
 func NewErrUnknownRouterType(t string) error {
 	return &ErrUnknownRouterType{t}
 }
-
-//

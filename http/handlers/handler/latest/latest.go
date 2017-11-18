@@ -6,10 +6,10 @@ import (
 	"github.com/corpix/formats"
 	"github.com/corpix/loggers"
 	"github.com/cryptounicorns/queues"
-	"github.com/cryptounicorns/queues/consumer"
+	queueConsumer "github.com/cryptounicorns/queues/consumer"
 	"github.com/cryptounicorns/queues/result"
 
-	"github.com/cryptounicorns/platypus/http/handlers/cache"
+	cacheHandler "github.com/cryptounicorns/platypus/http/handlers/cache"
 )
 
 type Latest struct {
@@ -20,9 +20,9 @@ type Latest struct {
 	responseFormat formats.Format
 	consumerFormat formats.Format
 
-	Cache    *cache.Cache
+	Cache    *cacheHandler.Cache
 	Queue    queues.Queue
-	Consumer consumer.Consumer
+	Consumer queueConsumer.Consumer
 }
 
 func (l *Latest) returnError(err error, rw http.ResponseWriter) bool {
@@ -121,14 +121,11 @@ func (l *Latest) Close() error {
 
 	err = l.Queue.Close()
 	if err != nil {
-		l.Cache.Close()
-		l.Consumer.Close()
 		return err
 	}
 
 	err = l.Consumer.Close()
 	if err != nil {
-		l.Cache.Close()
 		return err
 	}
 
@@ -142,40 +139,37 @@ func (l *Latest) Close() error {
 
 func New(c Config, l loggers.Logger) (*Latest, error) {
 	var (
-		rf     formats.Format
-		cf     formats.Format
-		ce     *cache.Cache
-		q      queues.Queue
-		cr     consumer.Consumer
-		latest *Latest
-		err    error
+		responseFormat formats.Format
+		consumerFormat formats.Format
+		ce             *cacheHandler.Cache
+		queue          queues.Queue
+		consumer       queueConsumer.Consumer
+		latest         *Latest
+		err            error
 	)
 
-	rf, err = formats.New(c.Format)
+	responseFormat, err = formats.New(c.Format)
 	if err != nil {
 		return nil, err
 	}
 
-	cf, err = formats.New(c.Consumer.Format)
+	consumerFormat, err = formats.New(c.Consumer.Format)
 	if err != nil {
 		return nil, err
 	}
 
-	ce, err = cache.New(c.Cache, l)
+	ce, err = cacheHandler.New(c.Cache, l)
 	if err != nil {
 		return nil, err
 	}
 
-	q, err = queues.New(c.Consumer.Queue, l)
+	queue, err = queues.New(c.Consumer.Queue, l)
 	if err != nil {
-		ce.Close()
 		return nil, err
 	}
 
-	cr, err = q.Consumer()
+	consumer, err = queue.Consumer()
 	if err != nil {
-		q.Close()
-		ce.Close()
 		return nil, err
 	}
 
@@ -183,12 +177,12 @@ func New(c Config, l loggers.Logger) (*Latest, error) {
 		config: c,
 		log:    l,
 
-		responseFormat: rf,
-		consumerFormat: cf,
+		responseFormat: responseFormat,
+		consumerFormat: consumerFormat,
 
 		Cache:    ce,
-		Queue:    q,
-		Consumer: cr,
+		Queue:    queue,
+		Consumer: consumer,
 	}
 
 	go latest.consumerWorker()

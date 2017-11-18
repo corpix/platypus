@@ -1,4 +1,4 @@
-package stream
+package streams
 
 import (
 	"io"
@@ -14,7 +14,7 @@ import (
 	"github.com/cryptounicorns/platypus/iopool"
 )
 
-type Stream struct {
+type Streams struct {
 	*websocket.UpgradeHandler
 	config          Config
 	log             loggers.Logger
@@ -22,10 +22,10 @@ type Stream struct {
 	websocketFormat formats.Format
 	Connections     *iopool.Writer
 	Router          routers.Router
-	Consumer        *consumer.Stream
+	Consumers       []*consumer.Stream
 }
 
-func (s *Stream) websocketWorker(meta *consumer.Meta) {
+func (s *Streams) websocketWorker(meta *consumer.Meta) {
 	for {
 		select {
 		case <-s.done:
@@ -37,6 +37,7 @@ func (s *Stream) websocketWorker(meta *consumer.Meta) {
 				buf []byte
 				err error
 			)
+
 			if r.Err != nil {
 				// XXX: Consumer always closes after error, so return here.
 				s.log.Error(r.Err)
@@ -58,33 +59,42 @@ func (s *Stream) websocketWorker(meta *consumer.Meta) {
 	}
 }
 
-func (s *Stream) ServeWebsocket(c io.WriteCloser, r *http.Request) {
+func (s *Streams) websocketWorkers() {
+	for _, cr := range s.Consumers {
+		go s.websocketWorker(cr.Meta)
+	}
+}
+
+func (s *Streams) ServeWebsocket(c io.WriteCloser, r *http.Request) {
 	s.Connections.Add(writer.NewServerText(c))
 }
 
-func (s *Stream) Close() error {
+func (s *Streams) Close() error {
 	var (
 		err error
 	)
 
 	close(s.done)
 
-	s.Router.Close()
-	err = s.Consumer.Close()
-	if err != nil {
-		return err
+	// FIXME: Refactor writer pool to writecloser
+	// So we could close all connections.
+	for _, cr := range s.Consumers {
+		err = cr.Close()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func New(c Config, l loggers.Logger) (*Stream, error) {
+func New(c Config, l loggers.Logger) (*Streams, error) {
 	var (
 		writerPool      = iopool.NewWriter()
 		websocketFormat formats.Format
-		router          routers.Router
-		cr              *consumer.Stream
-		stream          *Stream
+		r               routers.Router
+		consumers       []*consumer.Stream
+		s               *Streams
 		err             error
 	)
 
@@ -93,7 +103,7 @@ func New(c Config, l loggers.Logger) (*Stream, error) {
 		return nil, err
 	}
 
-	router, err = routers.New(
+	r, err = routers.New(
 		c.Router,
 		writerPool,
 		routers.NewWriterPoolCleaner(writerPool, l),
@@ -103,29 +113,23 @@ func New(c Config, l loggers.Logger) (*Stream, error) {
 		return nil, err
 	}
 
-	cr, err = consumer.NewStream(
-		c.Consumer,
-		l,
-	)
+	consumers, err = consumer.NewStreams(c.Consumers, l)
 	if err != nil {
 		return nil, err
 	}
 
-	stream = &Stream{
+	s = &Streams{
 		config:          c,
 		log:             l,
 		websocketFormat: websocketFormat,
 		Connections:     writerPool,
-		Router:          router,
-		Consumer:        cr,
+		Router:          r,
+		Consumers:       consumers,
 	}
 
-	stream.UpgradeHandler = websocket.NewUpgradeHandler(
-		stream,
-		l,
-	)
+	s.UpgradeHandler = websocket.NewUpgradeHandler(s, l)
 
-	go stream.websocketWorker(cr.Meta)
+	s.websocketWorkers()
 
-	return stream, nil
+	return s, nil
 }

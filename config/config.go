@@ -20,9 +20,10 @@ import (
 	"github.com/cryptounicorns/platypus/http/handlers/handler/stream"
 	"github.com/cryptounicorns/platypus/http/handlers/routers"
 	"github.com/cryptounicorns/platypus/http/handlers/routers/router/broadcast"
-	"github.com/cryptounicorns/platypus/http/handlers/stores"
-	"github.com/cryptounicorns/platypus/http/handlers/stores/store/memoryttl"
 	"github.com/cryptounicorns/platypus/logger"
+	"github.com/cryptounicorns/platypus/stores"
+	"github.com/cryptounicorns/platypus/stores/store/memoryttl"
+	jsonTime "github.com/cryptounicorns/platypus/time"
 )
 
 var (
@@ -57,7 +58,7 @@ var (
 					Router: routers.Config{
 						Type: routers.BroadcastRouterType,
 						Broadcast: broadcast.Config{
-							WriteTimeout: 10 * time.Second,
+							WriteTimeout: jsonTime.Duration(10 * time.Second),
 							Pool: pool.Config{
 								Workers:   128,
 								QueueSize: 1024,

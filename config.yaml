@@ -6,8 +6,8 @@ http:
   addr: ":8080"
   handlers:
 
-  - path: "/api/v1/tickers/stream"
-    method: get
+  - method: get
+    path: "/api/v1/tickers/stream"
     type: stream
     stream:
       format: json
@@ -18,13 +18,40 @@ http:
           nsq:
             addr: 127.0.0.1:4150
             topic: ticker
-            channel: platypus-stream
+            channel: platypus-tickers-stream
             consumerBufferSize: 128
       router:
         type: broadcast
 
-  - path: "/api/v1/tickers"
-    method: get
+  - method: get
+    path: "/api/v1/tickers-changes/stream"
+    type: streams
+    streams:
+      format: json
+      consumers:
+      - format: json
+        queue:
+          type: nsq
+          nsq:
+            addr: 127.0.0.1:4150
+            topic: ticker
+            channel: platypus-tc-streams
+            consumerBufferSize: 128
+      - format: json
+        queue:
+          type: nsq
+          nsq:
+            addr: 127.0.0.1:4150
+            topic: change
+            channel: platypus-tc-streams
+            consumerBufferSize: 128
+      wrap: >-
+        {"type":"{{ .Consumer.Topic }}","payload":{{ .EventJSON }}}
+      router:
+        type: broadcast
+
+  - method: get
+    path: "/api/v1/tickers"
     type: latest
     latest:
       format: json
@@ -35,47 +62,19 @@ http:
           nsq:
             addr: 127.0.0.1:4150
             topic: ticker
-            channel: platypus-latest
+            channel: platypus-tickers-latest
             consumerBufferSize: 128
       cache:
         key: |
           {{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}
         store:
           type: memoryttl
+          memoryttl:
+            ttl: 24h
+            resolution: 1m
 
-  # - Path: "/api/v1/tickers-changes/stream"
-  #   Method: get
-  #   Type: streamwrap
-  #   StreamWrap:
-  #     Wrap: |
-  #       function (consumer, v, k)
-  #           return {
-  #               type    = consumer.Nsq.Topic,
-  #               payload = v
-  #           }
-  #       end
-  #     Consumers:
-  #     - Type: nsq
-  #       Format: json
-  #       Nsq:
-  #         Addr: 127.0.0.1:4150
-  #         Topic: ticker
-  #         Channel: platypus-stream
-  #         ConsumerBufferSize: 128
-  #         LogLevel: 1
-  #     - Type: nsq
-  #       Format: json
-  #       Nsq:
-  #         Addr: 127.0.0.1:4150
-  #         Topic: change
-  #         Channel: platypus-stream
-  #         ConsumerBufferSize: 128
-  #         LogLevel: 1
-  #     Router:
-  #       Type: broadcast
-
-  # - Path: "/api/v1/tickers-changes"
-  #   Method: get
+  # - Method: get
+  #   Path: "/api/v1/tickers-changes"
   #   Type: latestfold
   #   LatestFold:
   #     Fold: |

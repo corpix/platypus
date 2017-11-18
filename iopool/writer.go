@@ -1,12 +1,12 @@
-package writerpool
+package iopool
 
 import (
 	"io"
 	"sync"
 )
 
-// WriterPool represents a dynamic and iterable pool of Writer interfaces.
-type WriterPool struct {
+// Writer represents a dynamic and iterable  of Writer interfaces.
+type Writer struct {
 	mutex *sync.Mutex
 
 	// FIXME: More effective solution is possible if we will use
@@ -14,8 +14,8 @@ type WriterPool struct {
 	writers []io.Writer
 }
 
-// Add adds a Writer to the pool.
-func (wp *WriterPool) Add(c io.Writer) {
+// Add adds a Writer to the .
+func (wp *Writer) Add(c io.Writer) {
 	wp.mutex.Lock()
 	defer wp.mutex.Unlock()
 
@@ -25,8 +25,8 @@ func (wp *WriterPool) Add(c io.Writer) {
 	)
 }
 
-// Has returns true if Writer exists in the pool and false otherwise.
-func (wp *WriterPool) Has(c io.Writer) bool {
+// Has returns true if Writer exists in the  and false otherwise.
+func (wp *Writer) Has(c io.Writer) bool {
 	for _, v := range wp.writers {
 		if v == c {
 			return true
@@ -35,10 +35,10 @@ func (wp *WriterPool) Has(c io.Writer) bool {
 	return false
 }
 
-// Remove removes Writer from the pool if it exists
+// Remove removes Writer from the  if it exists
 // and returns true in this case, otherwise it will be
 // false.
-func (wp *WriterPool) Remove(c io.Writer) bool {
+func (wp *Writer) Remove(c io.Writer) bool {
 	wp.mutex.Lock()
 	defer wp.mutex.Unlock()
 
@@ -59,9 +59,9 @@ func (wp *WriterPool) Remove(c io.Writer) bool {
 	return false
 }
 
-// Iter performs a full-scan of the pool with fn
-// invoked for every Writer in the pool.
-func (wp *WriterPool) Iter(fn func(io.Writer)) {
+// Iter performs a full-scan of the  with fn
+// invoked for every Writer in the .
+func (wp *Writer) Iter(fn func(io.Writer)) {
 	wp.mutex.Lock()
 	defer wp.mutex.Unlock()
 
@@ -70,9 +70,9 @@ func (wp *WriterPool) Iter(fn func(io.Writer)) {
 	}
 }
 
-// New creates new WriterPool.
-func New() *WriterPool {
-	return &WriterPool{
+// NewWriter creates new Writer.
+func NewWriter() *Writer {
+	return &Writer{
 		mutex:   &sync.Mutex{},
 		writers: []io.Writer{},
 	}

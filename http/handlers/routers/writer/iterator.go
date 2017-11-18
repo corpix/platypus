@@ -1,9 +1,9 @@
-package router
+package writer
 
 import (
 	"io"
 )
 
-type Writers interface {
+type Iterator interface {
 	Iter(func(io.Writer))
 }

@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"github.com/cryptounicorns/platypus/http/handlers/stores"
+	"github.com/cryptounicorns/platypus/stores"
 )
 
 type Config struct {

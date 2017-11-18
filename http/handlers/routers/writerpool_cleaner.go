@@ -1,4 +1,4 @@
-package router
+package routers
 
 import (
 	"io"
@@ -6,10 +6,11 @@ import (
 
 	"github.com/corpix/loggers"
 
-	"github.com/cryptounicorns/platypus/writerpool"
+	"github.com/cryptounicorns/platypus/http/handlers/routers/errors"
+	"github.com/cryptounicorns/platypus/iopool"
 )
 
-func WriterPoolCleanerErrorHandler(ws *writerpool.WriterPool, l loggers.Logger) ErrorHandler {
+func NewWriterPoolCleaner(ws *iopool.Writer, l loggers.Logger) errors.Handler {
 	return func(w io.Writer, err error) {
 		var (
 			closer io.Closer
@@ -25,7 +26,7 @@ func WriterPoolCleanerErrorHandler(ws *writerpool.WriterPool, l loggers.Logger) 
 
 		closer, ok = w.(io.Closer)
 		if ok {
-			closer.Close()
+			_ = closer.Close()
 		}
 	}
 }

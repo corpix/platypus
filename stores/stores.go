@@ -8,8 +8,8 @@ import (
 	"github.com/corpix/loggers/logger/prefixwrapper"
 	"github.com/fatih/structs"
 
-	"github.com/cryptounicorns/platypus/http/handlers/stores/store/memory"
-	"github.com/cryptounicorns/platypus/http/handlers/stores/store/memoryttl"
+	"github.com/cryptounicorns/platypus/stores/store/memory"
+	"github.com/cryptounicorns/platypus/stores/store/memoryttl"
 )
 
 const (

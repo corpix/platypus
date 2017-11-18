@@ -11,11 +11,14 @@ import (
 
 	"github.com/cryptounicorns/platypus/http/handlers/handler/latest"
 	"github.com/cryptounicorns/platypus/http/handlers/handler/stream"
+	"github.com/cryptounicorns/platypus/http/handlers/handler/streams"
 )
 
 const (
-	LatestType = "latest"
-	StreamType = "stream"
+	LatestType  = "latest"
+	LatestsType = "latests"
+	StreamType  = "stream"
+	StreamsType = "streams"
 )
 
 type Handlers []Handler
@@ -66,6 +69,14 @@ func New(c Config, r *mux.Router, l loggers.Logger) (Handler, error) {
 		case StreamType:
 			h, err = stream.New(
 				v.Value().(stream.Config),
+				log,
+			)
+			if err != nil {
+				return nil, err
+			}
+		case StreamsType:
+			h, err = streams.New(
+				v.Value().(streams.Config),
 				log,
 			)
 			if err != nil {

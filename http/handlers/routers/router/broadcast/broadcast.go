@@ -8,46 +8,40 @@ import (
 	"github.com/corpix/loggers"
 	"github.com/corpix/pool"
 
-	"github.com/cryptounicorns/platypus/http/handlers/routers/router"
+	"github.com/cryptounicorns/platypus/http/handlers/routers/errors"
+	"github.com/cryptounicorns/platypus/http/handlers/routers/writer"
 )
 
 type Broadcast struct {
+	ErrorHandler errors.Handler
+	Pool         *pool.Pool
+	Iterator     writer.Iterator
+	Reader       io.Reader
+	Config       Config
 	log          loggers.Logger
-	ErrorHandler router.ErrorHandler
-
-	*pool.Pool
-	router.Writers
-	router.Writer
-	Config
 }
 
 func (b *Broadcast) worker(buf []byte, wg *sync.WaitGroup, c io.Writer, cancel context.CancelFunc) pool.Executor {
 	return func(ctx context.Context) {
+		defer wg.Done()
+
+		var (
+			err error
+		)
+
 		select {
 		case <-ctx.Done():
+			deadline, _ := ctx.Deadline()
+			b.log.Error("Canceled after ", deadline)
 		default:
-			err := b.Writer(c, buf)
+			defer cancel()
+
+			_, err = c.Write(buf)
 			if err != nil {
 				b.ErrorHandler(c, err)
+				return
 			}
-			cancel()
 		}
-		wg.Done()
-	}
-}
-
-func (b *Broadcast) iterator(buf []byte, wg *sync.WaitGroup) func(io.Writer) {
-	return func(c io.Writer) {
-		ctx, cancel := context.WithTimeout(
-			context.Background(),
-			b.Config.WriteTimeout,
-		)
-
-		wg.Add(1)
-		b.Pool.Feed <- pool.NewWork(
-			ctx,
-			b.worker(buf, wg, c, cancel),
-		)
 	}
 }
 
@@ -58,7 +52,26 @@ func (b *Broadcast) Write(buf []byte) (int, error) {
 		wg = &sync.WaitGroup{}
 	)
 
-	b.Writers.Iter(b.iterator(buf, wg))
+	b.Iterator.Iter(
+		func(c io.Writer) {
+			var (
+				ctx     context.Context
+				cancel  context.CancelFunc
+				timeout = b.Config.WriteTimeout
+			)
+
+			ctx, cancel = context.WithTimeout(
+				context.Background(),
+				timeout.Duration(),
+			)
+
+			wg.Add(1)
+			b.Pool.Feed <- pool.NewWork(
+				ctx,
+				b.worker(buf, wg, c, cancel),
+			)
+		},
+	)
 
 	wg.Wait()
 	return len(buf), nil
@@ -66,17 +79,15 @@ func (b *Broadcast) Write(buf []byte) (int, error) {
 
 func (b *Broadcast) Close() error {
 	b.Pool.Close()
-
 	return nil
 }
 
-func New(c Config, ws router.Writers, w router.Writer, e router.ErrorHandler, l loggers.Logger) (*Broadcast, error) {
+func New(c Config, w writer.Iterator, e errors.Handler, l loggers.Logger) (*Broadcast, error) {
 	return &Broadcast{
-		log:          l,
 		Pool:         pool.NewFromConfig(c.Pool),
-		Writers:      ws,
-		Writer:       w,
+		Iterator:     w,
 		ErrorHandler: e,
 		Config:       c,
+		log:          l,
 	}, nil
 }

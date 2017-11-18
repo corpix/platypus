@@ -1,4 +1,4 @@
-package stream
+package streams
 
 import (
 	"github.com/cryptounicorns/platypus/http/handlers/consumer"
@@ -8,6 +8,7 @@ import (
 type Config struct {
 	Format string
 
-	Consumer consumer.Config
-	Router   routers.Config
+	Consumers []consumer.Config
+	Wrap      string
+	Router    routers.Config
 }

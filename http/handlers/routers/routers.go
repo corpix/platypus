@@ -8,15 +8,16 @@ import (
 	"github.com/corpix/loggers/logger/prefixwrapper"
 	"github.com/fatih/structs"
 
-	"github.com/cryptounicorns/platypus/http/handlers/routers/router"
+	"github.com/cryptounicorns/platypus/http/handlers/routers/errors"
 	"github.com/cryptounicorns/platypus/http/handlers/routers/router/broadcast"
+	"github.com/cryptounicorns/platypus/http/handlers/routers/writer"
 )
 
 const (
 	BroadcastRouterType = "broadcast"
 )
 
-func New(c Config, ws router.Writers, w router.Writer, e router.ErrorHandler, l loggers.Logger) (Router, error) {
+func New(c Config, w writer.Iterator, e errors.Handler, l loggers.Logger) (Router, error) {
 	var (
 		t   = strings.ToLower(c.Type)
 		log = prefixwrapper.New(
@@ -37,7 +38,6 @@ func New(c Config, ws router.Writers, w router.Writer, e router.ErrorHandler, l 
 		case BroadcastRouterType:
 			return broadcast.New(
 				v.Value().(broadcast.Config),
-				ws,
 				w,
 				e,
 				log,
@@ -45,5 +45,5 @@ func New(c Config, ws router.Writers, w router.Writer, e router.ErrorHandler, l 
 		}
 	}
 
-	return nil, NewErrUnknownRouterType(c.Type)
+	return nil, errors.NewErrUnknownRouterType(c.Type)
 }
