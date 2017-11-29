@@ -25,8 +25,8 @@ var (
 
 // Config represents application configuration structure.
 type Config struct {
-	Logger   logger.Config    `validate:"required"`
-	HTTP     http.Config      `validate:"required"`
+	Logger   logger.Config    `validate:"required,dive"`
+	HTTP     http.Config      `validate:"required,dive"`
 	Handlers handlers.Configs `validate:"required,dive"`
 }
 
