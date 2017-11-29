@@ -28,7 +28,7 @@ func (s *MemoryTTL) Name() string {
 }
 
 func (s *MemoryTTL) Set(key string, value interface{}) error {
-	s.log.Debug("Set ", key, value)
+	s.log.Debugf("Set key '%s' with value '%#v'", key, value)
 
 	s.locker.Lock()
 	defer s.locker.Unlock()
