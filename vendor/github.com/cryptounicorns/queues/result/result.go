@@ -5,8 +5,11 @@ import (
 )
 
 type Result struct {
-	// Hey, go authors, you forgot to add this thing...
-	// Called "generics" :D
 	Value message.Message
+	Err   error
+}
+
+type Generic struct {
+	Value interface{}
 	Err   error
 }

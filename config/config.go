@@ -4,117 +4,30 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"time"
 
 	"github.com/corpix/formats"
-	"github.com/corpix/pool"
-	"github.com/cryptounicorns/queues"
-	"github.com/cryptounicorns/queues/queue/nsq"
+	"github.com/go-playground/validator"
 	"github.com/imdario/mergo"
 
+	"github.com/cryptounicorns/platypus/handlers"
 	"github.com/cryptounicorns/platypus/http"
-	"github.com/cryptounicorns/platypus/http/handlers"
-	"github.com/cryptounicorns/platypus/http/handlers/cache"
-	"github.com/cryptounicorns/platypus/http/handlers/consumer"
-	"github.com/cryptounicorns/platypus/http/handlers/handler/latest"
-	"github.com/cryptounicorns/platypus/http/handlers/handler/stream"
-	"github.com/cryptounicorns/platypus/http/handlers/memoize"
-	"github.com/cryptounicorns/platypus/http/handlers/routers"
-	"github.com/cryptounicorns/platypus/http/handlers/routers/router/broadcast"
 	"github.com/cryptounicorns/platypus/logger"
-	"github.com/cryptounicorns/platypus/stores"
-	"github.com/cryptounicorns/platypus/stores/store/memoryttl"
-	jsonTime "github.com/cryptounicorns/platypus/time"
 )
 
 var (
-	// LoggerConfig represents default logger config.
-	LoggerConfig = logger.Config{
-		Level: "info",
-	}
-
-	// HTTPConfig represents default http server config.
-	HTTPConfig = http.Config{
-		Addr: ":8080",
-		Handlers: handlers.Configs{
-			{
-				Path:   "/api/v1/tickers/stream",
-				Method: "get",
-				Type:   handlers.StreamType,
-				Stream: stream.Config{
-					Format: formats.JSON,
-					Consumer: consumer.Config{
-						Format: formats.JSON,
-						Queue: queues.Config{
-							Type: queues.NsqQueueType,
-							Nsq: nsq.Config{
-								Addr:     "127.0.0.1:4150",
-								Topic:    "ticker",
-								Channel:  "platypus-stream",
-								LogLevel: nsq.LogLevelInfo,
-							},
-						},
-					},
-					// FIXME: Rename to Router?
-					Router: routers.Config{
-						Type: routers.BroadcastRouterType,
-						Broadcast: broadcast.Config{
-							WriteTimeout: jsonTime.Duration(10 * time.Second),
-							Pool: pool.Config{
-								Workers:   128,
-								QueueSize: 1024,
-							},
-						},
-					},
-				},
-			},
-
-			{
-				Path:   "/api/v1/tickers",
-				Method: "get",
-				Type:   handlers.LatestType,
-				Latest: latest.Config{
-					Format: formats.JSON,
-					Memoize: memoize.Config{
-						Consumer: consumer.Config{
-							Format: formats.JSON,
-							Queue: queues.Config{
-								Type: queues.NsqQueueType,
-								Nsq: nsq.Config{
-									Addr:     "127.0.0.1:4150",
-									Topic:    "ticker",
-									Channel:  "platypus-latest",
-									LogLevel: nsq.LogLevelInfo,
-								},
-							},
-						},
-						Cache: cache.Config{
-							Key: `{{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}`,
-							Store: stores.Config{
-								Type: stores.MemoryTTLStoreType,
-								MemoryTTL: memoryttl.Config{
-									TTL:        jsonTime.Duration(24 * time.Hour),
-									Resolution: jsonTime.Duration(1 * time.Minute),
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-
 	// Default represents default application config.
 	Default = Config{
-		Logger: LoggerConfig,
-		HTTP:   HTTPConfig,
+		Logger: logger.Config{
+			Level: "info",
+		},
 	}
 )
 
 // Config represents application configuration structure.
 type Config struct {
-	Logger logger.Config
-	HTTP   http.Config
+	Logger   logger.Config    `validate:"required"`
+	HTTP     http.Config      `validate:"required"`
+	Handlers handlers.Configs `validate:"required,dive"`
 }
 
 // FromReader returns parsed config data in some `f` from reader `r`.
@@ -122,9 +35,10 @@ type Config struct {
 // config, so it will have default values.
 func FromReader(f formats.Format, r io.Reader) (Config, error) {
 	var (
-		c   Config
-		buf []byte
-		err error
+		validate = validator.New()
+		c        Config
+		buf      []byte
+		err      error
 	)
 
 	buf, err = ioutil.ReadAll(r)
@@ -138,6 +52,11 @@ func FromReader(f formats.Format, r io.Reader) (Config, error) {
 	}
 
 	err = f.Unmarshal(buf, &c)
+	if err != nil {
+		return c, err
+	}
+
+	err = validate.Struct(c)
 	if err != nil {
 		return c, err
 	}
