@@ -4,7 +4,7 @@
         "Level": "info"
     },
     "HTTP": {
-        "Addr": "127.0.0.1:8080"
+        "Addr": "0.0.0.0:8080"
     },
     "Handlers": [
         {
@@ -18,7 +18,7 @@
                     "Queue": {
                         "Type": "nsq",
                         "Nsq": {
-                            "Addr": "127.0.0.1:4150",
+                            "Addr": "nsqd:4150",
                             "Channel": "platypus-latest",
                             "ConsumerBufferSize": 128,
                             "Topic": "ticker",
@@ -50,7 +50,7 @@
                             "Queue": {
                                 "Type": "nsq",
                                 "Nsq": {
-                                    "Addr": "127.0.0.1:4150",
+                                    "Addr": "nsqd:4150",
                                     "Topic": "ticker",
                                     "Channel": "platypus-tc-latests",
                                     "ConsumerBufferSize": 128
@@ -73,7 +73,7 @@
                             "Queue": {
                                 "Type": "nsq",
                                 "Nsq": {
-                                    "Addr": "127.0.0.1:4150",
+                                    "Addr": "nsqd:4150",
                                     "Topic": "change",
                                     "Channel": "platypus-tc-latests",
                                     "ConsumerBufferSize": 128
@@ -114,7 +114,7 @@
                     "Queue": {
                         "Type": "nsq",
                         "Nsq": {
-                            "Addr": "127.0.0.1:4150",
+                            "Addr": "nsqd:4150",
                             "Channel": "platypus-stream",
                             "ConsumerBufferSize": 128,
                             "Topic": "ticker",
@@ -137,7 +137,7 @@
                             "Queue": {
                                 "Type": "nsq",
                                 "Nsq": {
-                                    "Addr": "127.0.0.1:4150",
+                                    "Addr": "nsqd:4150",
                                     "Topic": "ticker",
                                     "Channel": "platypus-tc-streams",
                                     "ConsumerBufferSize": 128
@@ -151,7 +151,7 @@
                             "Queue": {
                                 "Type": "nsq",
                                 "Nsq": {
-                                    "Addr": "127.0.0.1:4150",
+                                    "Addr": "nsqd:4150",
                                     "Topic": "change",
                                     "Channel": "platypus-tc-streams",
                                     "ConsumerBufferSize": 128
