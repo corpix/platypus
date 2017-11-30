@@ -7,8 +7,6 @@ import (
 	"github.com/cryptounicorns/platypus/handlers/handler/streams"
 )
 
-type Configs = []Config
-
 type Config struct {
 	Path   string `validate:"required"`
 	Method string `validate:"required"`

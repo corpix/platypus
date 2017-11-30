@@ -25,9 +25,9 @@ var (
 
 // Config represents application configuration structure.
 type Config struct {
-	Logger   logger.Config    `validate:"required,dive"`
-	HTTP     http.Config      `validate:"required,dive"`
-	Handlers handlers.Configs `validate:"required,dive"`
+	Logger   logger.Config     `validate:"required,dive"`
+	HTTP     http.Config       `validate:"required,dive"`
+	Handlers []handlers.Config `validate:"required,dive"`
 }
 
 // FromReader returns parsed config data in some `f` from reader `r`.
