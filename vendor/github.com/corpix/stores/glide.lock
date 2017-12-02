@@ -1,5 +1,5 @@
-hash: 9b26b380c6876530ea43cee18a4e278c9c8edfc853508a6afaf5be977d62b560
-updated: 2017-11-29T03:29:08.665548844Z
+hash: 7970243b5b8351917364c617bceba4a6fb263d298297d00309c7215ff8420dc6
+updated: 2017-12-01T23:11:45.245937552Z
 imports:
 - name: github.com/corpix/loggers
   version: 69c4a7d3244f0509086d4080e8898376aeb95e09
@@ -7,8 +7,6 @@ imports:
   - logger/prefixwrapper
 - name: github.com/corpix/time
   version: 9adb218ff5319d3f3e3d5a44fe0cb5d4880762f4
-- name: github.com/fatih/structs
-  version: f5faa72e73092639913f5833b75e1ac1d6bc7a63
 testImports:
 - name: github.com/davecgh/go-spew
   version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9

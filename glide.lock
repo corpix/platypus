@@ -1,5 +1,5 @@
-hash: ed2d0613d075d0829c3f1b904ac0d474dee87223f4d6e6ce0f4da7c743c8188c
-updated: 2017-11-29T19:46:01.95621484Z
+hash: b5334e1a033b0700eb1670d48d34a4d23a13f62d32f7365d9e7920d1719549a8
+updated: 2017-12-02T01:17:58.946402325Z
 imports:
 - name: github.com/bitly/go-nsq
   version: 8c1ff52dff6fd3ecc19c418649bc643b18e862fc
@@ -18,7 +18,7 @@ imports:
 - name: github.com/corpix/pool
   version: 2396288b6b816f5330c0b92798177655e2509d06
 - name: github.com/corpix/stores
-  version: 5df1a64abb17a866dbcc8f098c3aa78e141bc162
+  version: 6e928963c62c49aad5f322e0af61550d7da921ea
   subpackages:
   - errors
   - store/memory
@@ -28,7 +28,7 @@ imports:
 - name: github.com/corpix/time
   version: 9adb218ff5319d3f3e3d5a44fe0cb5d4880762f4
 - name: github.com/cryptounicorns/queues
-  version: b4b32f3d7d94c9de6e7aaf336c0d9328e0c32da4
+  version: 495952b4a7817423309b258cf11442a73fb84951
   subpackages:
   - consumer
   - errors
@@ -56,8 +56,6 @@ imports:
   version: bb955e01b9346ac19dc29eb16586c90ded99a98c
 - name: github.com/eapache/queue
   version: 44cc805cf13205b55f69e14bcb69867d1ae92f98
-- name: github.com/fatih/structs
-  version: f5faa72e73092639913f5833b75e1ac1d6bc7a63
 - name: github.com/go-playground/locales
   version: e4cbcb5d0652150d40ad0646651076b6bd2be4f6
   subpackages:
@@ -110,7 +108,7 @@ imports:
   subpackages:
   - ssh/terminal
 - name: golang.org/x/sys
-  version: 316e9227019baa6ea3f76ea21538bab101fd1182
+  version: 8b4580aae2a0dd0c231a45d3ccb8434ff533b840
   subpackages:
   - unix
   - windows

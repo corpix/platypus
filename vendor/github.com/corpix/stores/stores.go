@@ -6,7 +6,6 @@ import (
 
 	"github.com/corpix/loggers"
 	"github.com/corpix/loggers/logger/prefixwrapper"
-	"github.com/fatih/structs"
 
 	"github.com/corpix/stores/store/memory"
 	"github.com/corpix/stores/store/memoryttl"
@@ -24,24 +23,18 @@ func New(c Config, l loggers.Logger) (Store, error) {
 		)
 	)
 
-	for _, v := range structs.New(c).Fields() {
-		if strings.ToLower(v.Name()) != t {
-			continue
-		}
-
-		switch t {
-		case memory.Name:
-			return memory.New(
-				v.Value().(memory.Config),
-				log,
-			)
-		case memoryttl.Name:
-			return memoryttl.New(
-				v.Value().(memoryttl.Config),
-				log,
-			)
-		}
+	switch t {
+	case memory.Name:
+		return memory.New(
+			c.Memory,
+			log,
+		)
+	case memoryttl.Name:
+		return memoryttl.New(
+			c.MemoryTTL,
+			log,
+		)
+	default:
+		return nil, NewErrUnknownStoreType(c.Type)
 	}
-
-	return nil, NewErrUnknownStoreType(c.Type)
 }

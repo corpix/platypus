@@ -4,7 +4,6 @@ import:
   subpackages:
   - logger/prefixwrapper
 - package: github.com/corpix/time
-- package: github.com/fatih/structs
 testImport:
 - package: github.com/stretchr/testify
   subpackages:

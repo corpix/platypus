@@ -17,7 +17,6 @@ import:
 - package: github.com/davecgh/go-spew
   subpackages:
   - spew
-- package: github.com/fatih/structs
 - package: github.com/go-playground/validator
 - package: github.com/gorilla/mux
 - package: github.com/imdario/mergo

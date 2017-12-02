@@ -8,7 +8,6 @@ import (
 
 	"github.com/corpix/loggers"
 	"github.com/corpix/loggers/logger/prefixwrapper"
-	"github.com/fatih/structs"
 
 	"github.com/cryptounicorns/platypus/handlers/handler/latest"
 	"github.com/cryptounicorns/platypus/handlers/handler/latests"
@@ -37,54 +36,30 @@ func New(c Config, l loggers.Logger) (Handler, error) {
 			),
 			l,
 		)
-		handler Handler
-		err     error
 	)
 
-	for _, v := range structs.New(c).Fields() {
-		if strings.ToLower(v.Name()) != t {
-			continue
-		}
-
-		switch t {
-		case latest.Name:
-			handler, err = latest.New(
-				v.Value().(latest.Config),
-				log,
-			)
-			if err != nil {
-				return nil, err
-			}
-		case latests.Name:
-			handler, err = latests.New(
-				v.Value().(latests.Config),
-				log,
-			)
-			if err != nil {
-				return nil, err
-			}
-		case stream.Name:
-			handler, err = stream.New(
-				v.Value().(stream.Config),
-				log,
-			)
-			if err != nil {
-				return nil, err
-			}
-		case streams.Name:
-			handler, err = streams.New(
-				v.Value().(streams.Config),
-				log,
-			)
-			if err != nil {
-				return nil, err
-			}
-		default:
-			continue
-		}
-
-		return handler, nil
+	switch t {
+	case latest.Name:
+		return latest.New(
+			c.Latest,
+			log,
+		)
+	case latests.Name:
+		return latests.New(
+			c.Latests,
+			log,
+		)
+	case stream.Name:
+		return stream.New(
+			c.Stream,
+			log,
+		)
+	case streams.Name:
+		return streams.New(
+			c.Streams,
+			log,
+		)
+	default:
+		return nil, NewErrUnknownHandlerType(c.Type)
 	}
-
-	return nil, NewErrUnknownHandlerType(c.Type)
 }
