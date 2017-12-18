@@ -3,7 +3,7 @@ with import <nixpkgs>{};
 
 buildGo19Package rec {
   name = "platypus-unstable-${version}";
-  version = "2017-11-14";
+  version = "development";
 
   buildInputs = with pkgs; [ git glide ];
 
