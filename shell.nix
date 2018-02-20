@@ -1,13 +1,13 @@
 with import <nixpkgs> {};
 stdenv.mkDerivation {
-  name = "mole-shell";
+  name = "nix-cage-shell";
   buildInputs = [
-    ncurses
     go
     gocode
-    go-bindata
     glide
     godef
-    bison
   ];
+  shellHook = ''
+    export GOPATH=~/projects
+  '';
 }
