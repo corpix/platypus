@@ -6,17 +6,10 @@ let
   name = "platypus";
   cfg = config.services."${name}";
   pkg = (pkgs.callPackage ./default.nix { }).bin;
-  configFile = pkgs.writeText "config.json" (builtins.toJSON cfg.application);
-  in {
+in {
   options = with types; {
     services."${name}" = {
       enable = mkEnableOption "Platypus HTTP+WEBSOCKET data server";
-      application = mkOption {
-        default = {};
-        description = ''
-          Application-level configuration.
-        '';
-      };
       user = mkOption {
         default = name;
         type = string;
@@ -29,6 +22,12 @@ let
         type = string;
         description =''
           Group name to run service from.
+        '';
+      };
+      configuration = mkOption {
+        default = {};
+        description = ''
+          Application configuration.
         '';
       };
     };
@@ -57,7 +56,7 @@ let
         Type = "simple";
         User = name;
         Group = name;
-        ExecStart = "${pkg}/bin/${name} -c ${configFile}";
+        ExecStart = "${pkg}/bin/${name} -c ${pkgs.writeText "config.json" (builtins.toJSON cfg.configuration)}";
         Restart = "on-failure";
         RestartSec = 1;
       };
