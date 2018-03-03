@@ -19,9 +19,9 @@
                         Type = "nsq";
                         Nsq = {
                             Addr = "127.0.0.1:4150";
+                            Topic = "tickers";
                             Channel = "platypus-latest";
                             ConsumerBufferSize = 128;
-                            Topic = "ticker";
                             LogLevel = "info";
                         };
                     };
@@ -30,8 +30,8 @@
                     Type = "memoryttl";
                     MemoryTTL = {
                         TTL = "24h";
-			Resolution = "1m";
-		    };
+			                  Resolution = "1m";
+		                };
                 };
                 Key = ''{{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}'';
             };
@@ -50,7 +50,7 @@
                                 Type = "nsq";
                                 Nsq = {
                                     Addr = "127.0.0.1:4150";
-                                    Topic = "ticker";
+                                    Topic = "tickers";
                                     Channel = "platypus-tc-latests";
                                     ConsumerBufferSize = 128;
                                 };
@@ -60,9 +60,9 @@
                             Type = "memoryttl";
                             MemoryTTL = {
                                 TTL = "24h";
-				Resolution = "1m";
-			    };
-			};
+				                        Resolution = "1m";
+			                      };
+			                  };
                         Key = ''{{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}'';
                     }
                     {
@@ -72,7 +72,7 @@
                                 Type = "nsq";
                                 Nsq = {
                                     Addr = "127.0.0.1:4150";
-                                    Topic = "change";
+                                    Topic = "changes";
                                     Channel = "platypus-tc-latests";
                                     ConsumerBufferSize = 128;
                                 };
@@ -81,11 +81,11 @@
                         Store = {
                             Type = "memoryttl";
                             MemoryTTL = {
-                                TTL =        "24h";
-				Resolution = "1m";
-			    };
+                                TTL = "24h";
+				                        Resolution = "1m";
+			                      };
                         };
-                        Key = "{{.period}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}";
+                        Key = ''{{.period}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}'';
                     }
                 ];
                 Wrap = ''{{"{"}}{{range $i, $e := $}}{{if $i}},{{end}}"{{- $e.Input.Consumer.Queue.Nsq.Topic -}}":{{- (printf "%s" $e.Events.JSON) -}}{{end}}{{"}"}}'';
@@ -110,9 +110,9 @@
                         Type = "nsq";
                         Nsq = {
                             Addr = "127.0.0.1:4150";
+                            Topic = "tickers";
                             Channel = "platypus-stream";
                             ConsumerBufferSize = 128;
-                            Topic = "ticker";
                             LogLevel = "info";
                         };
                     };
@@ -133,7 +133,7 @@
                                 Type = "nsq";
                                 Nsq = {
                                     Addr = "127.0.0.1:4150";
-                                    Topic = "ticker";
+                                    Topic = "tickers";
                                     Channel = "platypus-tc-streams";
                                     ConsumerBufferSize = 128;
                                 };
@@ -147,7 +147,7 @@
                                 Type = "nsq";
                                 Nsq = {
                                     Addr = "127.0.0.1:4150";
-                                    Topic = "change";
+                                    Topic = "changes";
                                     Channel = "platypus-tc-streams";
                                     ConsumerBufferSize = 128;
                                 };

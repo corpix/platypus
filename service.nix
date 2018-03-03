@@ -24,6 +24,12 @@ in {
           Group name to run service from.
         '';
       };
+      domain = mkOption {
+        type = str;
+        description = ''
+          Domain which should be used for this service.
+        '';
+      };
       configuration = mkOption {
         default = {};
         description = ''
@@ -60,6 +66,32 @@ in {
         Restart = "on-failure";
         RestartSec = 1;
       };
+    };
+
+    services.nginx = {
+      upstreams = {
+        platypus = {
+          servers = {
+            "${cfg.configuration.HTTP.Addr}" = { backup = false; };
+          };
+        };
+      };
+
+      virtualHosts."${cfg.domain}".extraConfig = let
+        proxy = path: ''
+          location ${path.path} {
+            proxy_pass       http://platypus;
+            proxy_set_header X-Forwarded-For $remote_addr;
+            ${optionalString (path.type == "stream" || path.type == "streams") ''
+              proxy_set_header   Upgrade         $http_upgrade;
+              proxy_set_header   Connection      "upgrade";
+            ''}
+          }
+        '';
+        paths = configuration: map
+          (handler: { path = handler.Path; type = handler.Type; })
+          configuration.Handlers;
+      in mkAfter (concatStringsSep "\n" (map proxy (paths cfg.configuration)));
     };
   };
 }
