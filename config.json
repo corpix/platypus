@@ -4,35 +4,6 @@
   },
   "Handlers": [
     {
-      "Latest": {
-        "Consumer": {
-          "Format": "json",
-          "Queue": {
-            "Nsq": {
-              "Addr": "127.0.0.1:4150",
-              "Channel": "platypus-latest",
-              "ConsumerBufferSize": 128,
-              "LogLevel": "info",
-              "Topic": "ticker"
-            },
-            "Type": "nsq"
-          }
-        },
-        "Format": "json",
-        "Key": "{{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}",
-        "Store": {
-          "MemoryTTL": {
-            "Resolution": "1m",
-            "TTL": "24h"
-          },
-          "Type": "memoryttl"
-        }
-      },
-      "Method": "get",
-      "Path": "/api/v1/tickers",
-      "Type": "latest"
-    },
-    {
       "Latests": {
         "Format": "json",
         "Inputs": [
@@ -44,12 +15,12 @@
                   "Addr": "127.0.0.1:4150",
                   "Channel": "platypus-tc-latests",
                   "ConsumerBufferSize": 128,
-                  "Topic": "ticker"
+                  "Topic": "tickers"
                 },
                 "Type": "nsq"
               }
             },
-            "Key": "{{.market}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}",
+            "Key": "{{.market}}|{{.symbolPair}}",
             "Store": {
               "MemoryTTL": {
                 "Resolution": "1m",
@@ -66,12 +37,12 @@
                   "Addr": "127.0.0.1:4150",
                   "Channel": "platypus-tc-latests",
                   "ConsumerBufferSize": 128,
-                  "Topic": "change"
+                  "Topic": "changes"
                 },
                 "Type": "nsq"
               }
             },
-            "Key": "{{.period}}|{{(index .currencyPair 0).symbol}}|{{(index .currencyPair 1).symbol}}",
+            "Key": "{{.period}}|{{.symbolPair}}",
             "Store": {
               "MemoryTTL": {
                 "Resolution": "1m",
@@ -84,40 +55,12 @@
         "Wrap": "{{\"{\"}}{{range $i, $e := $}}{{if $i}},{{end}}\"{{- $e.Input.Consumer.Queue.Nsq.Topic -}}\":{{- (printf \"%s\" $e.Events.JSON) -}}{{end}}{{\"}\"}}"
       },
       "Method": "get",
-      "Path": "/api/v1/tickers-changes",
+      "Path": "/api/v1/events",
       "Type": "latests"
     },
     {
       "Method": "get",
-      "Path": "/api/v1/tickers/stream",
-      "Stream": {
-        "Consumer": {
-          "Format": "json",
-          "Queue": {
-            "Nsq": {
-              "Addr": "127.0.0.1:4150",
-              "Channel": "platypus-stream",
-              "ConsumerBufferSize": 128,
-              "LogLevel": "info",
-              "Topic": "ticker"
-            },
-            "Type": "nsq"
-          }
-        },
-        "Format": "json",
-        "Writer": {
-          "Pool": {
-            "QueueSize": 1024,
-            "Workers": 128
-          },
-          "ScheduleTimeout": "10s"
-        }
-      },
-      "Type": "stream"
-    },
-    {
-      "Method": "get",
-      "Path": "/api/v1/tickers-changes/stream",
+      "Path": "/api/v1/events/stream",
       "Streams": {
         "Format": "json",
         "Inputs": [
@@ -129,7 +72,7 @@
                   "Addr": "127.0.0.1:4150",
                   "Channel": "platypus-tc-streams",
                   "ConsumerBufferSize": 128,
-                  "Topic": "ticker"
+                  "Topic": "tickers"
                 },
                 "Type": "nsq"
               }
@@ -143,7 +86,7 @@
                   "Addr": "127.0.0.1:4150",
                   "Channel": "platypus-tc-streams",
                   "ConsumerBufferSize": 128,
-                  "Topic": "change"
+                  "Topic": "changes"
                 },
                 "Type": "nsq"
               }
