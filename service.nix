@@ -54,9 +54,8 @@ in {
     systemd.services."${name}" = {
       enable = true;
 
-      wants    = [ "nsqd.service" "nginx.service"  ];
       wantedBy = [ "multi-user.target" ];
-      after    = [ "network.target" ];
+      after    = [ "nsqd.service" "network.target" ];
 
       serviceConfig = {
         Type = "simple";
