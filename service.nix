@@ -79,8 +79,9 @@ in {
       virtualHosts."${cfg.domain}".extraConfig = let
         proxy = path: ''
           location ${path.path} {
-            proxy_pass       http://platypus;
-            proxy_set_header X-Forwarded-For $remote_addr;
+            proxy_pass         http://platypus;
+            proxy_set_header   X-Forwarded-For $remote_addr;
+            proxy_http_version 1.1;
             ${optionalString (path.type == "stream" || path.type == "streams") ''
               proxy_set_header   Upgrade         $http_upgrade;
               proxy_set_header   Connection      "upgrade";
