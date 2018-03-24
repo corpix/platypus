@@ -1,53 +1,55 @@
 package websocket
 
 import (
-	"io"
 	"net/http"
 
 	"github.com/corpix/loggers"
 	"github.com/corpix/loggers/logger/prefixwrapper"
-	"github.com/gobwas/ws"
+	"github.com/gorilla/websocket"
 )
 
 var (
 	DefaultHeaders = http.Header{}
 )
 
-// UpgradeHandler is a net/http.Handler which is responsible
+// HTTPUpgradeHandler is a net/http.Handler which is responsible
 // for incomming HTTP request upgrade process and handling the
 // upgraded request with some Handler which works only with
 // websockets.
-type UpgradeHandler struct {
+type HTTPUpgradeHandler struct {
 	Handler
 	log loggers.Logger
 }
 
-func (h *UpgradeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *HTTPUpgradeHandler) ServeHTTP(rwc http.ResponseWriter, r *http.Request) {
 	r.Body.Close()
 
 	var (
-		c   io.WriteCloser
+		c   *websocket.Conn
 		err error
 	)
 
-	c, _, _, err = ws.UpgradeHTTP(
-		r,
-		w,
-		DefaultHeaders,
-	)
+	c, err = websocket.Upgrade(rwc, r, DefaultHeaders, 1024, 1024)
 	if err != nil {
 		h.log.Error(err)
 		return
 	}
 
-	h.ServeWebsocket(c, r)
+	h.ServeWebsocket(
+		NewReadWriteCloser(
+			NewReader(c),
+			NewWriter(c),
+			c,
+		),
+		r,
+	)
 }
 
-func NewUpgradeHandler(h Handler, l loggers.Logger) *UpgradeHandler {
-	return &UpgradeHandler{
+func NewHTTPUpgradeHandler(h Handler, l loggers.Logger) *HTTPUpgradeHandler {
+	return &HTTPUpgradeHandler{
 		Handler: h,
 		log: prefixwrapper.New(
-			"UpgradeHandler: ",
+			"HTTPUpgradeHandler: ",
 			l,
 		),
 	}

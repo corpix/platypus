@@ -12,8 +12,6 @@ import:
 - package: github.com/corpix/template
 - package: github.com/cryptounicorns/queues
 - package: github.com/cryptounicorns/websocket
-  subpackages:
-  - writer
 - package: github.com/davecgh/go-spew
   subpackages:
   - spew
