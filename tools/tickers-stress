@@ -1,0 +1,30 @@
+#! /usr/bin/env bash
+set -e
+
+[ ! -z "$1" ] || {
+    echo
+    echo "Will send a lot of same tickers to nsq topic 'tickers' to stress-test platypus."
+    echo
+    echo "usage: $0 <nsqd-tcp-address>"
+    echo
+    exit 1
+} 1>&2
+
+finish() {
+    echo Stopping
+}
+
+
+trap finish EXIT
+
+num=0
+
+while true
+do
+    if [ $((num%5000)) = 0 ]
+    then
+        echo "[$(date)] Produced $num tickers" 1>&2
+    fi
+    echo '{"high":9000,"low":8271.1,"vol":49561.37624191,"last":8876,"buy":8876.4,"sell":8875.1,"timestamp":1521854258478716881,"symbolPair":"BTC-USD","market":"bitfinex","tags":["mole","* * * * * *"]}'
+    num=$((num + 1))
+done | to_nsq --topic tickers --nsqd-tcp-address $1
