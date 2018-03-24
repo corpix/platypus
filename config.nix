@@ -15,8 +15,8 @@
         Format = "json";
         Inputs = [
           {
+            Format = "json";
             Consumer = {
-              Format = "json";
               Queue = {
                 Type = "nsq";
                 Nsq = {
@@ -34,11 +34,11 @@
 				        Resolution = "1m";
 			        };
 			      };
-            Key = ''{{.market}}|{{.symbolPair}}'';
+            Key = ''{{.Message.market}}|{{.Message.symbolPair}}'';
           }
           {
+            Format = "json";
             Consumer = {
-              Format = "json";
               Queue = {
                 Type = "nsq";
                 Nsq = {
@@ -56,10 +56,10 @@
 				        Resolution = "1m";
 			        };
             };
-            Key = ''{{.period}}|{{.symbolPair}}'';
+            Key = ''{{.Message.period}}|{{.Message.symbolPair}}'';
           }
         ];
-        Wrap = ''{{"{"}}{{range $i, $e := $}}{{if $i}},{{end}}"{{- $e.Input.Consumer.Queue.Nsq.Topic -}}":{{- (printf "%s" $e.Events.JSON) -}}{{end}}{{"}"}}'';
+        Wrap = ''{{"{"}}{{range $i, $e := $}}{{if $i}},{{end}}"{{- $e.Config.Consumer.Queue.Nsq.Topic -}}":{{- (printf "%s" $e.Data) -}}{{end}}{{"}"}}'';
       };
     }
     {
@@ -67,11 +67,9 @@
       Path = "/api/v1/events/stream";
       Type = "streams";
       Streams = {
-        Format = "json";
         Inputs = [
           {
             Consumer = {
-              Format = "json";
               Queue = {
                 Type = "nsq";
                 Nsq = {
@@ -85,7 +83,6 @@
           }
           {
             Consumer = {
-              Format = "json";
               Queue = {
                 Type = "nsq";
                 Nsq = {
@@ -98,7 +95,7 @@
             };
           }
         ];
-        Wrap = ''{"type":"{{- .Input.Consumer.Queue.Nsq.Topic -}}","payload":{{- (printf "%s" .Event.JSON) -}}}'';
+        Wrap = ''{"type":"{{- .Config.Consumer.Queue.Nsq.Topic -}}","payload":{{- (printf "%s" .Message) -}}}'';
         Writer = {
           ScheduleTimeout = "10s";
           Pool = {

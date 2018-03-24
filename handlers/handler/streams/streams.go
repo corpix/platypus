@@ -7,13 +7,14 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/corpix/effects/closer"
 	"github.com/corpix/effects/writer"
-	"github.com/corpix/formats"
 	"github.com/corpix/loggers"
 	"github.com/corpix/template"
 	"github.com/cryptounicorns/queues"
+	"github.com/cryptounicorns/queues/consumer"
+	"github.com/cryptounicorns/queues/result"
 	"github.com/cryptounicorns/websocket"
-	websocketWriter "github.com/cryptounicorns/websocket/writer"
 
 	"github.com/cryptounicorns/platypus/handlers/handler/stream"
 )
@@ -22,19 +23,10 @@ const (
 	Name = "streams"
 )
 
-type wrapContext struct {
-	Input stream.Config
-	Event struct {
-		JSON  []byte
-		Value interface{}
-	}
-}
-
 type Streams struct {
-	*websocket.UpgradeHandler
+	*websocket.HTTPUpgradeHandler
 
 	config Config
-	format formats.Format
 	wrap   *template.Template
 	writer *writer.ConcurrentMultiWriter
 	log    loggers.Logger
@@ -42,44 +34,94 @@ type Streams struct {
 
 func (s *Streams) Run(ctx context.Context) error {
 	var (
-		errs chan error
+		errs = make(chan error)
 	)
 
 	for _, config := range s.config.Inputs {
 		go func(config stream.Config) {
-			errs <- queues.PipeConsumerToWriterWith(
-				config.Consumer,
-				ctx,
-				func(v interface{}) ([]byte, error) {
-					var (
-						ctx = wrapContext{}
-						buf []byte
-						err error
-					)
-
-					buf, err = s.format.Marshal(v)
-					if err != nil {
-						return nil, err
-					}
-
-					ctx.Input = config
-					ctx.Event.JSON = buf
-					ctx.Event.Value = v
-
-					return s.wrap.Apply(ctx)
-				},
-				s.writer,
-				s.log,
-			)
+			err := s.runStream(config, ctx)
+			if err != nil {
+				errs <- err
+			}
 		}(config)
 	}
 
 	return <-errs
-
 }
 
-func (s *Streams) ServeWebsocket(c io.WriteCloser, r *http.Request) {
-	s.writer.Add(websocketWriter.NewServerText(c))
+func (s *Streams) runStream(config stream.Config, ctx context.Context) error {
+	var (
+		closers = closer.Closers{}
+		q       queues.Queue
+		cr      consumer.Consumer
+		st      <-chan result.Result
+		err     error
+	)
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			err := closers.Close()
+			if err != nil {
+				s.log.Error(err)
+			}
+			return
+		}
+	}()
+
+	q, err = queues.FromConfig(config.Consumer.Queue, s.log)
+	if err != nil {
+		return err
+	}
+	closers = append(closers, q)
+
+	cr, err = q.Consumer()
+	if err != nil {
+		return err
+	}
+	closers = append(closers, cr)
+
+	st, err = cr.Consume()
+	if err != nil {
+		return err
+	}
+
+	for r := range st {
+		if r.Err != nil {
+			return r.Err
+		}
+
+		var (
+			buf []byte
+			err error
+		)
+
+		if s.wrap != nil {
+			buf, err = s.wrap.Apply(struct {
+				Config  stream.Config
+				Message []byte
+			}{
+				Config:  config,
+				Message: r.Value,
+			})
+			if err != nil {
+				return err
+			}
+		} else {
+			buf = r.Value
+		}
+
+		_, err = s.writer.Write(buf)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *Streams) ServeWebsocket(rwc io.ReadWriteCloser, r *http.Request) {
+	s.writer.Add(rwc)
 }
 
 func (s *Streams) Close() error {
@@ -88,17 +130,11 @@ func (s *Streams) Close() error {
 
 func New(c Config, l loggers.Logger) (*Streams, error) {
 	var (
-		f       formats.Format
 		t       *template.Template
 		w       *writer.ConcurrentMultiWriter
 		streams *Streams
 		err     error
 	)
-
-	f, err = formats.New(c.Format)
-	if err != nil {
-		return nil, err
-	}
 
 	t, err = template.Parse(strings.TrimSpace(c.Wrap))
 	if err != nil {
@@ -124,13 +160,12 @@ func New(c Config, l loggers.Logger) (*Streams, error) {
 
 	streams = &Streams{
 		config: c,
-		format: f,
 		wrap:   t,
 		writer: w,
 		log:    l,
 	}
 
-	streams.UpgradeHandler = websocket.NewUpgradeHandler(
+	streams.HTTPUpgradeHandler = websocket.NewHTTPUpgradeHandler(
 		streams,
 		l,
 	)

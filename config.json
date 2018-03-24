@@ -9,7 +9,6 @@
         "Inputs": [
           {
             "Consumer": {
-              "Format": "json",
               "Queue": {
                 "Nsq": {
                   "Addr": "127.0.0.1:4150",
@@ -20,7 +19,8 @@
                 "Type": "nsq"
               }
             },
-            "Key": "{{.market}}|{{.symbolPair}}",
+            "Format": "json",
+            "Key": "{{.Message.market}}|{{.Message.symbolPair}}",
             "Store": {
               "MemoryTTL": {
                 "Resolution": "1m",
@@ -31,7 +31,6 @@
           },
           {
             "Consumer": {
-              "Format": "json",
               "Queue": {
                 "Nsq": {
                   "Addr": "127.0.0.1:4150",
@@ -42,7 +41,8 @@
                 "Type": "nsq"
               }
             },
-            "Key": "{{.period}}|{{.symbolPair}}",
+            "Format": "json",
+            "Key": "{{.Message.period}}|{{.Message.symbolPair}}",
             "Store": {
               "MemoryTTL": {
                 "Resolution": "1m",
@@ -52,7 +52,7 @@
             }
           }
         ],
-        "Wrap": "{{\"{\"}}{{range $i, $e := $}}{{if $i}},{{end}}\"{{- $e.Input.Consumer.Queue.Nsq.Topic -}}\":{{- (printf \"%s\" $e.Events.JSON) -}}{{end}}{{\"}\"}}"
+        "Wrap": "{{\"{\"}}{{range $i, $e := $}}{{if $i}},{{end}}\"{{- $e.Config.Consumer.Queue.Nsq.Topic -}}\":{{- (printf \"%s\" $e.Data) -}}{{end}}{{\"}\"}}"
       },
       "Method": "get",
       "Path": "/api/v1/events",
@@ -62,11 +62,9 @@
       "Method": "get",
       "Path": "/api/v1/events/stream",
       "Streams": {
-        "Format": "json",
         "Inputs": [
           {
             "Consumer": {
-              "Format": "json",
               "Queue": {
                 "Nsq": {
                   "Addr": "127.0.0.1:4150",
@@ -80,7 +78,6 @@
           },
           {
             "Consumer": {
-              "Format": "json",
               "Queue": {
                 "Nsq": {
                   "Addr": "127.0.0.1:4150",
@@ -93,7 +90,7 @@
             }
           }
         ],
-        "Wrap": "{\"type\":\"{{- .Input.Consumer.Queue.Nsq.Topic -}}\",\"payload\":{{- (printf \"%s\" .Event.JSON) -}}}",
+        "Wrap": "{\"type\":\"{{- .Config.Consumer.Queue.Nsq.Topic -}}\",\"payload\":{{- (printf \"%s\" .Message) -}}}",
         "Writer": {
           "Pool": {
             "QueueSize": 1024,

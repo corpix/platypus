@@ -6,7 +6,6 @@ import (
 )
 
 type Config struct {
-	Format   string
 	Consumer queues.GenericConfig
 	Writer   writer.ConcurrentMultiWriterConfig
 }

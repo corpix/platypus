@@ -5,11 +5,14 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/corpix/effects/closer"
 	"github.com/corpix/formats"
 	"github.com/corpix/loggers"
 	"github.com/corpix/stores"
 	"github.com/corpix/template"
 	"github.com/cryptounicorns/queues"
+	"github.com/cryptounicorns/queues/consumer"
+	"github.com/cryptounicorns/queues/result"
 
 	httpHelper "github.com/cryptounicorns/platypus/http"
 )
@@ -27,8 +30,16 @@ type Latest struct {
 
 func (l *Latest) Run(ctx context.Context) error {
 	var (
-		tpl *template.Template
-		err error
+		closers = closer.Closers{}
+		tpl     *template.Template
+		f       formats.Format
+		q       queues.Queue
+		cr      consumer.Consumer
+		mcr     consumer.Generic
+		st      <-chan result.Generic
+		k       []byte
+		v       interface{}
+		err     error
 	)
 
 	tpl, err = template.Parse(strings.TrimSpace(l.config.Key))
@@ -36,25 +47,65 @@ func (l *Latest) Run(ctx context.Context) error {
 		return err
 	}
 
-	return queues.PipeConsumerToStoreWith(
-		l.config.Consumer,
-		ctx,
-		func(v interface{}) (string, interface{}, error) {
-			var (
-				key []byte
-				err error
-			)
-
-			key, err = tpl.Apply(v)
+	go func() {
+		select {
+		case <-ctx.Done():
+			err := closers.Close()
 			if err != nil {
-				return "", nil, err
+				l.log.Error(err)
 			}
+			return
+		}
+	}()
 
-			return string(key), v, nil
-		},
-		l.store,
-		l.log,
-	)
+	f, err = formats.New(l.config.Format)
+	if err != nil {
+		return err
+	}
+
+	q, err = queues.FromConfig(l.config.Consumer.Queue, l.log)
+	if err != nil {
+		return err
+	}
+	closers = append(closers, q)
+
+	cr, err = q.Consumer()
+	if err != nil {
+		return err
+	}
+	closers = append(closers, cr)
+
+	mcr = consumer.NewUnmarshal(cr, new(interface{}), f)
+	closers = append(closers, mcr)
+
+	st, err = mcr.Consume()
+	if err != nil {
+		return err
+	}
+
+	for r := range st {
+		if r.Err != nil {
+			return r.Err
+		}
+
+		k, err = tpl.Apply(struct {
+			Config  Config
+			Message interface{}
+		}{
+			Config:  l.config,
+			Message: r.Value,
+		})
+		if err != nil {
+			return err
+		}
+
+		err = l.store.Set(string(k), v)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (l *Latest) ServeHTTP(rw http.ResponseWriter, r *http.Request) {

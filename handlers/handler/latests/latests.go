@@ -5,11 +5,14 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/corpix/effects/closer"
 	"github.com/corpix/formats"
 	"github.com/corpix/loggers"
 	"github.com/corpix/stores"
 	"github.com/corpix/template"
 	"github.com/cryptounicorns/queues"
+	"github.com/cryptounicorns/queues/consumer"
+	"github.com/cryptounicorns/queues/result"
 
 	"github.com/cryptounicorns/platypus/handlers/handler/latest"
 	httpHelper "github.com/cryptounicorns/platypus/http"
@@ -18,14 +21,6 @@ import (
 const (
 	Name = "latests"
 )
-
-type wrapContext struct {
-	Input  latest.Config
-	Events struct {
-		JSON   []byte
-		Values []interface{}
-	}
-}
 
 type Latests struct {
 	config Config
@@ -37,50 +32,112 @@ type Latests struct {
 
 func (l *Latests) Run(ctx context.Context) error {
 	var (
-		errs chan error
+		errs = make(chan error)
 	)
 
 	for k, config := range l.config.Inputs {
 		go func(config latest.Config, store stores.Store) {
-			var (
-				tpl *template.Template
-				err error
-			)
-
-			tpl, err = template.Parse(config.Key)
+			err := l.runLatest(config, store, ctx)
 			if err != nil {
 				errs <- err
-				return
 			}
-
-			errs <- queues.PipeConsumerToStoreWith(
-				config.Consumer,
-				ctx,
-				func(v interface{}) (string, interface{}, error) {
-					var (
-						key []byte
-						err error
-					)
-
-					key, err = tpl.Apply(v)
-					if err != nil {
-						return "", nil, err
-					}
-
-					return string(key), v, nil
-				},
-				store,
-				l.log,
-			)
 		}(config, l.stores[k])
 	}
 
 	return <-errs
 }
 
+func (l *Latests) runLatest(config latest.Config, store stores.Store, ctx context.Context) error {
+	var (
+		closers = closer.Closers{}
+		tpl     *template.Template
+		f       formats.Format
+		q       queues.Queue
+		cr      consumer.Consumer
+		st      <-chan result.Result
+		k       []byte
+		v       interface{}
+		err     error
+	)
+
+	tpl, err = template.Parse(strings.TrimSpace(config.Key))
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			err := closers.Close()
+			if err != nil {
+				l.log.Error(err)
+			}
+			return
+		}
+	}()
+
+	f, err = formats.New(config.Format)
+	if err != nil {
+		return err
+	}
+
+	q, err = queues.FromConfig(config.Consumer.Queue, l.log)
+	if err != nil {
+		return err
+	}
+	closers = append(closers, q)
+
+	cr, err = q.Consumer()
+	if err != nil {
+		return err
+	}
+	closers = append(closers, cr)
+
+	st, err = cr.Consume()
+	if err != nil {
+		return err
+	}
+
+	for r := range st {
+		if r.Err != nil {
+			return r.Err
+		}
+
+		v = new(interface{})
+		err = f.Unmarshal(r.Value, v)
+		if err != nil {
+			return err
+		}
+
+		k, err = tpl.Apply(struct {
+			Config  latest.Config
+			Message interface{}
+		}{
+			Config:  config,
+			Message: v,
+		})
+		if err != nil {
+			return err
+		}
+
+		err = store.Set(string(k), v)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (l *Latests) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	var (
-		ctx    = make([]wrapContext, len(l.stores))
+		ctx = make(
+			[]struct {
+				Config latest.Config
+				Data   []byte
+			},
+			len(l.stores),
+		)
 		values []interface{}
 		buf    []byte
 		err    error
@@ -100,9 +157,8 @@ func (l *Latests) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ctx[k].Input = l.config.Inputs[k]
-		ctx[k].Events.JSON = buf
-		ctx[k].Events.Values = values
+		ctx[k].Config = l.config.Inputs[k]
+		ctx[k].Data = buf
 	}
 
 	buf, err = l.wrap.Apply(ctx)

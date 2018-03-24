@@ -6,12 +6,13 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/corpix/effects/closer"
 	"github.com/corpix/effects/writer"
-	"github.com/corpix/formats"
 	"github.com/corpix/loggers"
 	"github.com/cryptounicorns/queues"
+	"github.com/cryptounicorns/queues/consumer"
+	"github.com/cryptounicorns/queues/result"
 	"github.com/cryptounicorns/websocket"
-	websocketWriter "github.com/cryptounicorns/websocket/writer"
 )
 
 const (
@@ -19,26 +20,66 @@ const (
 )
 
 type Stream struct {
-	*websocket.UpgradeHandler
+	*websocket.HTTPUpgradeHandler
 
 	config Config
-	format formats.Format
 	writer *writer.ConcurrentMultiWriter
 	log    loggers.Logger
 }
 
 func (s *Stream) Run(ctx context.Context) error {
-	return queues.PipeConsumerToWriterWith(
-		s.config.Consumer,
-		ctx,
-		s.format.Marshal,
-		s.writer,
-		s.log,
+	var (
+		closers = closer.Closers{}
+		q       queues.Queue
+		cr      consumer.Consumer
+		st      <-chan result.Result
+		err     error
 	)
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			err := closers.Close()
+			if err != nil {
+				s.log.Error(err)
+			}
+			return
+		}
+	}()
+
+	q, err = queues.FromConfig(s.config.Consumer.Queue, s.log)
+	if err != nil {
+		return err
+	}
+	closers = append(closers, q)
+
+	cr, err = q.Consumer()
+	if err != nil {
+		return err
+	}
+	closers = append(closers, cr)
+
+	st, err = cr.Consume()
+	if err != nil {
+		return err
+	}
+
+	for r := range st {
+		if r.Err != nil {
+			return r.Err
+		}
+
+		_, err = s.writer.Write(r.Value)
+		if err != nil {
+			return nil
+		}
+	}
+
+	return nil
 }
 
-func (s *Stream) ServeWebsocket(c io.WriteCloser, r *http.Request) {
-	s.writer.Add(websocketWriter.NewServerText(c))
+func (s *Stream) ServeWebsocket(rwc io.ReadWriteCloser, r *http.Request) {
+	s.writer.Add(rwc)
 }
 
 func (s *Stream) Close() error {
@@ -48,16 +89,9 @@ func (s *Stream) Close() error {
 
 func New(c Config, l loggers.Logger) (*Stream, error) {
 	var (
-		f      formats.Format
 		w      *writer.ConcurrentMultiWriter
 		stream *Stream
-		err    error
 	)
-
-	f, err = formats.New(c.Format)
-	if err != nil {
-		return nil, err
-	}
 
 	w = writer.NewConcurrentMultiWriter(
 		c.Writer,
@@ -78,12 +112,11 @@ func New(c Config, l loggers.Logger) (*Stream, error) {
 
 	stream = &Stream{
 		config: c,
-		format: f,
 		writer: w,
 		log:    l,
 	}
 
-	stream.UpgradeHandler = websocket.NewUpgradeHandler(
+	stream.HTTPUpgradeHandler = websocket.NewHTTPUpgradeHandler(
 		stream,
 		l,
 	)
